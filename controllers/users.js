@@ -64,8 +64,8 @@ module.exports.createUser = async (req, res) => {
 };
 module.exports.updateUser = async (req, res) => {
   try {
-    const {name, about, avatar} = req.body;
-    const updateUser = await User.findByIdAndUpdate(req.user._id, {name, about, avatar}, { new: "true", runValidators: "true" } );
+    const {name, about} = req.body;
+    const updateUser = await User.findByIdAndUpdate(req.user._id, {name, about}, { new: "true", runValidators: "true" } );
     return res.status(200).send(await updateUser.save());
     //return res.status(200).send(updatedUser);
   } catch (error) {
@@ -85,7 +85,7 @@ module.exports.updateAvatar = async (req, res) => {
   try {
     const {avatar} = req.body;
     //console.log(req.body)
-    const updateAvatar = await User.findByIdAndUpdate(req.user._id, {avatar});
+    const updateAvatar = await User.findByIdAndUpdate(req.user._id, {avatar}, { new: "true", runValidators: "true" } );
     return res.status(200).send(updateAvatar);
     //return res.status(200).send(updateAvatar);
   } catch (error) {
