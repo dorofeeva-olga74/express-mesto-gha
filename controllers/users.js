@@ -65,7 +65,8 @@ module.exports.createUser = async (req, res) => {
 module.exports.updateUser = async (req, res) => {
   try {
     const {name, about} = req.body;
-    return res.status(200).send(await User.findByIdAndUpdate(req.user._id, {name, about}));
+    const updateUser = await User.findByIdAndUpdate(req.user._id, {name, about}, { new: "true", runValidators: "true" } );
+    return res.status(200).send(await updateUser.save());
     //return res.status(200).send(updatedUser);
   } catch (error) {
     if (error.name === "CastError") {
