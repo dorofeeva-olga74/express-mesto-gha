@@ -32,7 +32,7 @@ module.exports.deleteCard = async (req, res) => {
     const card = await Card.findById(cardId);
     const validationRegExp = new RegExp(/\w{24}/gm);
     const isValidate = validationRegExp.test(cardId);
-    if (!isValidate) {
+    if (isValidate) {
       return res.status(400).send({ message: "Переданы некорректные данные" });
     }
     if (!card) {
@@ -98,7 +98,7 @@ module.exports.dislikeCard = async (req, res) => {
       throw new Error("NotFound");
     }
     return res
-      .status(201)
+      .status(200)
       .send(await dislike.save());//???
     //res.status(200).send(card);
   } catch (error) {
