@@ -45,11 +45,11 @@ module.exports.getUserById = async (req, res) => {
 // }, createUser);
 module.exports.createUser = async (req, res) => {
   try {
-    const {name, about, avatar} = req.body;
+    //const {name, about, avatar} = req.body;
     // if (name.length <= 2) return res.status(400).send({ message: "Ошибка валидации полей", ...error })d
     //console.log(req.body)
-    const newUser = await new User({name, about, avatar});
-    //const newUser = await new User(req.body);
+    //const newUser = await new User(/{name, about, avatar});
+    const newUser = await new User(req.body);
     return res.status(201).send(await newUser.save());
   } catch (error) {
     if (error.name === "ValidationError") {
@@ -60,14 +60,12 @@ module.exports.createUser = async (req, res) => {
     if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
       return res.status(409).send({ message: "Пользователь уже существует" });
     }
-    console.log(error.code);
   }
 };
 module.exports.updateUser = async (req, res) => {
   try {
     const {name, about} = req.body;
-    const updateUser = await User.findByIdAndUpdate(req.user._id, {name, about});
-    return res.status(200).send(await updateUser.save());
+    return res.status(200).send(await User.findByIdAndUpdate(req.user._id, {name, about}));
     //return res.status(200).send(updatedUser);
   } catch (error) {
     if (error.name === "CastError") {
