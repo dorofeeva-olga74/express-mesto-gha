@@ -12,14 +12,12 @@ module.exports.getCards = async (req, res) => {
 };
 
 module.exports.createCard = async (req, res) => {
-  console.log(req.user._id); // _id станет доступен
+  // console.log(req.user._id); // _id станет доступен
   try {
     const {name, link} = req.body;
     //console.log(req.body)
-    const newCard = await new Card({name, link, owner: req.user._id}, { new: "true", runValidators: "true" } );
-    return res
-          .status(201)
-          .send(newCard);
+    const newCard = await new Card({name, link, owner: req.user._id});
+    return res.status(201).send(await newCard.save());
   } catch (error) {
     if (error.name === "ValidationError") {
       return res
