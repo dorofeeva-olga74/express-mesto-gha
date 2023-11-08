@@ -45,14 +45,14 @@ module.exports.getUserById = async (req, res) => {
 // }, createUser);
 module.exports.createUser = async (req, res) => {
   try {
-    //const {name, about, avatar} = req.body;
+    const {name, about, avatar} = req.body;
     // if (name.length <= 2) return res.status(400).send({ message: "Ошибка валидации полей", ...error })
     //console.log(req.body)
-    //const newUser = await new User({name, about, avatar});
-    const newUser = await new User(req.body);
+    const newUser = await new User({name, about, avatar});
+    //const newUser = await new User(req.body);
     return res.status(201).send(await newUser.save());
   } catch (error) {
-    if (error.name === "CastError") {
+    if (error.name === "ValidationError") {
       return res
         .status(400)
         .send({ message: "Ошибка валидации полей"});
