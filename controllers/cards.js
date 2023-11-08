@@ -16,7 +16,7 @@ module.exports.createCard = async (req, res) => {
   try {
     const {name, link} = req.body;
     //console.log(req.body)
-    const newCard = await new Card({name, link, owner: req.user._id});
+    const newCard = await new Card({name, link, owner: req.user._id}, { new: "true", runValidators: "true" } );
     return res
           .status(201)
           .send(newCard);
