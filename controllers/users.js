@@ -46,7 +46,7 @@ module.exports.getUserById = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   try {
     const {name, about, avatar} = req.body;
-    // if (name.length <= 2) return res.status(400).send({ message: "Ошибка валидации полей", ...error })
+    if (name.length <= 2) return res.status(400).send({ message: "Ошибка валидации полей", ...error })
     //console.log(req.body)
     const newUser = await new User({name, about, avatar});
     //const newUser = await new User(req.body);
