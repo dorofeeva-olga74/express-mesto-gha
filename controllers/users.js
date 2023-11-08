@@ -69,7 +69,7 @@ module.exports.updateUser = async (req, res) => {
     return res.status(200).send(await updateUser.save());
     //return res.status(200).send(updatedUser);
   } catch (error) {
-    if (error.name === "CastError") {
+    if (error.name === "ValidationError") {
       return res
         .status(400)
         .send({ message: "Ошибка валидации полей", ...error });
@@ -77,7 +77,7 @@ module.exports.updateUser = async (req, res) => {
     if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
       return res.status(409).send({ message: "Пользователь уже существует" });
     }
-    return res.status(404).send({ message: "Пользователь не найден" });
+    return res.status(500).send({ message: "Ошибка на стороне сервера" });
     //console.log(error.code);
   }
 };
