@@ -19,7 +19,7 @@ module.exports.createCard = async (req, res) => {
     const newCard = await new Card({name, link, owner: req.user._id});
     return res
           .status(201)
-          .send(await newCard.save());
+          .send(newCard);
   } catch (error) {
     if (error.name === "ValidationError") {
       return res
@@ -30,8 +30,13 @@ module.exports.createCard = async (req, res) => {
 };
 module.exports.deleteCard = async (req, res) => {
   try {
-    const { cardId } = req.params;
+    const { cardId } = req.params.cardId;
     const card = await Card.findById(cardId);
+    const validationRegExp = new RegExp(/\w{24}/gm);
+    const isValidate = validationRegExp.test(cardId);
+    if (!isValidate) {
+      return res.status(400).send({ message: "Переданы некорректные данные" });
+    }
     if (!card) {
       throw new Error("NotFound");
     }
@@ -43,6 +48,9 @@ module.exports.deleteCard = async (req, res) => {
        .status(200)
        .send({ message: "Карточка удалена" });
     } catch (error) {
+      if (error.message === "NotFound") {
+        return res.status(404).send({ message: "Карточка не найдена", ...error });
+      }
     return res
       .status(500)
       .send({ message: "Ошибка на стороне сервера", error: error.message });
@@ -60,9 +68,11 @@ module.exports.likeCard = async (req, res) => {
       .send(await likesCard.save());//???
     //res.status(200).send(card);
   } catch (error) {
-      return res
-        .status(404)
-        .send({ message: "Пользователь не найден", ...error });
+    if (error.message === "NotFound") {
+      return res.status(404).send({ message: "Пользователь не найден", ...error });
+    }
+    if (error.name === "CastError") {
+      return res.status(400).send({ message: "Передан не валидный id" });
     }
   }
 // Requiring ObjectId from mongoose npm package
@@ -88,8 +98,11 @@ module.exports.dislikeCard = async (req, res) => {
       .send(await dislike.save());//???
     //res.status(200).send(card);
   } catch (error) {
-      return res
-        .status(404)
-        .send({ message: "Пользователь не найден", ...error });
+    if (error.message === "NotFound") {
+      return res.status(404).send({ message: "Карточка не найдена" });
+    }
+
+    if (error.name === "CastError") {
+      return res.status(400).send({ message: "Передан не валидный id" });
     }
 }

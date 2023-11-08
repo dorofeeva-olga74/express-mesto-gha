@@ -35,6 +35,14 @@ app.use((req, res, next) => {
  app.use(express.json());
  app.use('/', router); // запускаем роутер
 
+ app.use(function (req, res, next) {
+  res
+    .status(404)
+    .send({
+      message: "Переданы некорректные данные или такого маршрута несуществует",
+    });
+});
+
  app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`)

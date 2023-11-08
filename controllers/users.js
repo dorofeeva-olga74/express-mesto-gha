@@ -46,11 +46,12 @@ module.exports.getUserById = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   try {
     const {name, about, avatar} = req.body;
+    // if (name.length <= 2) return res.status(400).send({ message: "Ошибка валидации полей", ...error })
     //console.log(req.body)
     const newUser = await new User({name, about, avatar});
     return res.status(201).send(await newUser.save());
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.name === "CastError") {
       return res
         .status(400)
         .send({ message: "Ошибка валидации полей", ...error });
@@ -65,10 +66,10 @@ module.exports.updateUser = async (req, res) => {
   try {
     const {name, about} = req.body;
     const updateUser = await User.findByIdAndUpdate(req.user._id, {name, about});
-    return res.status(201).send(await updateUser.save());
+    return res.status(200).send(await updateUser.save());
     //return res.status(200).send(updatedUser);
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.name === "CastError") {
       return res
         .status(400)
         .send({ message: "Ошибка валидации полей", ...error });
@@ -85,7 +86,7 @@ module.exports.updateAvatar = async (req, res) => {
     const {avatar} = req.body;
     //console.log(req.body)
     const updateAvatar = await User.findByIdAndUpdate(req.user._id, {avatar});
-    return res.status(201).send(await updateAvatar.save());
+    return res.status(200).send(updateAvatar);
     //return res.status(200).send(updateAvatar);
   } catch (error) {
     if (error.name === "ValidationError") {
