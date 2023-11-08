@@ -54,7 +54,7 @@ module.exports.createUser = async (req, res) => {
     if (error.name === "CastError") {
       return res
         .status(400)
-        .send({ message: "Ошибка валидации полей", ...error });
+        .send({ message: "Ошибка валидации полей"});
     }
     if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
       return res.status(409).send({ message: "Пользователь уже существует" });
