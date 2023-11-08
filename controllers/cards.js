@@ -27,33 +27,24 @@ module.exports.createCard = async (req, res) => {
   }
 };
 module.exports.deleteCard = async (req, res) => {
-  try {
-    const { cardId } = req.params.cardId;
-    const card = await Card.findById(cardId);
-    const validationRegExp = new RegExp(/\w{24}/gm);
-    const isValidate = validationRegExp.test(cardId);
-    if (isValidate) {
-      return res.status(400).send({ message: "Переданы некорректные данные" });
-    }
-    if (!card) {
-      throw new Error("NotFound");
-    }
-    if (!card.owner.equals(req.user._id)) { //Васька.equals(Мурзик) //equals -сравнение
-      throw new Error("Нет доступа для удаления карточки");
-    }
-    Card.deleteOne(card)
-    return res
-       .status(200)
-       .send({ message: "Карточка удалена" });
-    } catch (error) {
-      if (error.message === "NotFound") {
-        return res.status(404).send({ message: "Карточка не найдена", ...error });
-      }
-    return res
-      .status(500)
-      .send({ message: "Ошибка на стороне сервера", error: error.message });
+  const objectID = req.params.cardId;
+  const validationRegExp = new RegExp(/\w{24}/gm);
+  const isValidate = validationRegExp.test(objectID);
+  if (!isValidate) {
+    return res.status(400).send({ message: "Переданы некорректные данные" });
   }
-}
+  Card.findByIdAndRemove(objectID)
+    .then((card) => {
+      if (!card) {
+        return res.status(404).send({ message: "Карточка не найдена" });
+      }
+      res.send({ data: card });
+    })
+    .catch(() =>
+      res.status(500).send({ message: "На сервере произошла ошибка" })
+    );
+};
+
 module.exports.likeCard = async (req, res) => {
   try {
     const likesCard = await Card.findByIdAndUpdate(
