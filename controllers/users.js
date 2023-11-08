@@ -66,6 +66,7 @@ module.exports.updateUser = async (req, res) => {
   try {
     const {name, about} = req.body;
     const updateUser = await User.findByIdAndUpdate(req.user._id, {name, about}, { new: "true", runValidators: "true" } );
+    if (!updateUser) return res.status(404).send({ message: "Пользователь не найден" });
     return res.status(200).send(await updateUser.save());
     //return res.status(200).send(updatedUser);
   } catch (error) {
