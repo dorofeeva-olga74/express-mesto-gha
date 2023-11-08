@@ -61,13 +61,16 @@ module.exports.likeCard = async (req, res) => {
       { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
       { new: true },
     )
+    if (!likesCard) {
+      throw new Error("NotFound");
+    }
     return res
       .status(201)
       .send(await likesCard.save());//???
     //res.status(200).send(card);
   } catch (error) {
     if (error.message === "NotFound") {
-      return res.status(404).send({ message: "Пользователь не найден", ...error });
+      return res.status(404).send({ message: "Карточка не найдена", ...error });
     }
     if (error.name === "CastError") {
       return res.status(400).send({ message: "Передан не валидный id" });

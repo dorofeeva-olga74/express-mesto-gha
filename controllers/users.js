@@ -22,7 +22,6 @@ module.exports.getUserById = async (req, res) => {
     }
     return res.status(200).send(user);
   } catch (error) {
-    console.log(error);
     if (error.message === "NotFound") {
       return res.status(404).send({ message: "Пользователь по id не найден" });
     }
