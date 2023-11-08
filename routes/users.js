@@ -1,10 +1,6 @@
 const { getUsers, getUserById, createUser, updateUser, updateAvatar } = require('../controllers/users');
-
 // создадим express router
 const userRouter = require('express').Router();
-//import { Router } from "express";
-//const userRouter = Router();
-
 // Здесь роутинг
 userRouter.get('/', getUsers);
 userRouter.get('/:userId', getUserById);

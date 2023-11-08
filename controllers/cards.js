@@ -1,5 +1,4 @@
 const Card = require('../models/Card');
-//{ getCards, createCard, deleteCard, likeCard, dislikeCard }
 module.exports.getCards = async (req, res) => {
   try {
     const cards = await Card.find({});
@@ -14,9 +13,8 @@ module.exports.getCards = async (req, res) => {
 module.exports.createCard = async (req, res) => {
   // console.log(req.user._id); // _id станет доступен
   try {
-    const {name, link} = req.body;
-    //console.log(req.body)
-    const newCard = await new Card({name, link, owner: req.user._id});
+    const { name, link } = req.body;
+    const newCard = await new Card({ name, link, owner: req.user._id });
     return res.status(201).send(await newCard.save());
   } catch (error) {
     if (error.name === "ValidationError") {
@@ -57,8 +55,7 @@ module.exports.likeCard = async (req, res) => {
     }
     return res
       .status(201)
-      .send(await likesCard.save());//???
-    //res.status(200).send(card);
+      .send(await likesCard.save());
   } catch (error) {
     if (error.message === "NotFound") {
       return res.status(404).send({ message: "Карточка не найдена", ...error });
@@ -66,18 +63,8 @@ module.exports.likeCard = async (req, res) => {
     if (error.name === "CastError") {
       return res.status(400).send({ message: "Передан не валидный id" });
     }
-  }}
-// Requiring ObjectId from mongoose npm package
-// const ObjectId = require('mongoose').Types.ObjectId;
-// // Validator function
-// function isValidObjectId(id){
-//     if(ObjectId.isValid(id)){
-//         if((String)(new ObjectId(id)) === id)
-//             return true;
-//         return false;
-//     }
-//     return false;
-// }
+  }
+}
 module.exports.dislikeCard = async (req, res) => {
   try {
     const dislike = await Card.findByIdAndUpdate(
@@ -90,8 +77,7 @@ module.exports.dislikeCard = async (req, res) => {
     }
     return res
       .status(200)
-      .send(await dislike.save());//???
-    //res.status(200).send(card);
+      .send(await dislike.save());
   } catch (error) {
     if (error.message === "NotFound") {
       return res.status(404).send({ message: "Карточка не найдена" });
