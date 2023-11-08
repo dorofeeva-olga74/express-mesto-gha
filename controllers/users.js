@@ -66,7 +66,6 @@ module.exports.updateUser = async (req, res) => {
   try {
     const {name, about} = req.body;
     const updateUser = await User.findByIdAndUpdate(req.user._id, {name, about}, { new: "true", runValidators: "true" } );
-    if (!updateUser) return res.status(404).send({ message: "Пользователь не найден" });
     return res.status(200).send(await updateUser.save());
     //return res.status(200).send(updatedUser);
   } catch (error) {
@@ -78,7 +77,7 @@ module.exports.updateUser = async (req, res) => {
     if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
       return res.status(409).send({ message: "Пользователь уже существует" });
     }
-    return res.status(500).send({ message: "Ошибка на стороне сервера" });
+    return res.status(404).send({ message: "Пользователь не найден" });
     //console.log(error.code);
   }
 };
