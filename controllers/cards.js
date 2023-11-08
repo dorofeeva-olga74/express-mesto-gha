@@ -74,7 +74,7 @@ module.exports.likeCard = async (req, res) => {
     if (error.name === "CastError") {
       return res.status(400).send({ message: "Передан не валидный id" });
     }
-  }
+  }}
 // Requiring ObjectId from mongoose npm package
 // const ObjectId = require('mongoose').Types.ObjectId;
 // // Validator function
@@ -105,4 +105,5 @@ module.exports.dislikeCard = async (req, res) => {
     if (error.name === "CastError") {
       return res.status(400).send({ message: "Передан не валидный id" });
     }
+  }
 }
