@@ -1,0 +1,95 @@
+const Card = require('../models/Card');
+//{ getCards, createCard, deleteCard, likeCard, dislikeCard }
+module.exports.getCards = async (req, res) => {
+  try {
+    const cards = await Card.find({});
+    return res.send(cards);
+  } catch (error) {
+    return res
+      .status(500)
+      .send({ message: "Ошибка на стороне сервера", error: error.message });
+  }
+};
+
+module.exports.createCard = async (req, res) => {
+  console.log(req.user._id); // _id станет доступен
+  try {
+    const {name, link} = req.body;
+    //console.log(req.body)
+    const newCard = await new Card({name, link, owner: req.user._id});
+    return res
+          .status(201)
+          .send(await newCard.save());
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .send({ message: "Ошибка валидации полей", ...error });
+    }
+  }
+};
+module.exports.deleteCard = async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const card = await Card.findById(cardId);
+    if (!card) {
+      throw new Error("NotFound");
+    }
+    if (!card.owner.equals(req.user._id)) { //Васька.equals(Мурзик) //equals -сравнение
+      throw new Error("Нет доступа для удаления карточки");
+    }
+    Card.deleteOne(card)
+    return res
+       .status(200)
+       .send({ message: "Карточка удалена" });
+    } catch (error) {
+    return res
+      .status(500)
+      .send({ message: "Ошибка на стороне сервера", error: error.message });
+  }
+}
+module.exports.likeCard = async (req, res) => {
+  try {
+    const likesCard = await Card.findByIdAndUpdate(
+      req.params.cardId,
+      { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+      { new: true },
+    )
+    return res
+      .status(201)
+      .send(await likesCard.save());//???
+    //res.status(200).send(card);
+  } catch (error) {
+      return res
+        .status(404)
+        .send({ message: "Пользователь не найден", ...error });
+    }
+  }
+// Requiring ObjectId from mongoose npm package
+// const ObjectId = require('mongoose').Types.ObjectId;
+// // Validator function
+// function isValidObjectId(id){
+//     if(ObjectId.isValid(id)){
+//         if((String)(new ObjectId(id)) === id)
+//             return true;
+//         return false;
+//     }
+//     return false;
+// }
+module.exports.dislikeCard = async (req, res) => {
+  try {
+    const dislike = await Card.findByIdAndUpdate(
+      req.params.cardId,
+      { $pull: { likes: req.user._id } }, // убрать _id из массива
+      { new: true },
+    )
+    return res
+      .status(201)
+      .send(await dislike.save());//???
+    //res.status(200).send(card);
+  } catch (error) {
+      return res
+        .status(404)
+        .send({ message: "Пользователь не найден", ...error });
+    }
+}
