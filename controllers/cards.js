@@ -94,6 +94,9 @@ module.exports.dislikeCard = async (req, res) => {
       { $pull: { likes: req.user._id } }, // убрать _id из массива
       { new: true },
     )
+    if (!dislike) {
+      throw new Error("NotFound");
+    }
     return res
       .status(201)
       .send(await dislike.save());//???
