@@ -26,51 +26,36 @@ module.exports.createCard = async (req, res) => {
 };
 module.exports.deleteCard = async (req, res) => {
   try {
-  //  const { cardId } = req.params;
   const objectID = req.params.cardId;
-  //const user = await User.findById(userId);
+  
   Card.findById(objectID)
-  .orFail(() => {
-    throw new NotFound('Карточка с указанным  _id не найдена');
-  })
-    // .orFail(() => {
-    //   throw new NotFoundError("Карточка не найдена");
-    // //throw new Error("NotValidId");
-    // })
+    .orFail(() => {
+      throw new NotFoundError("Карточка не найдена");
+    //throw new Error("NotValidId");
+    })
     .then((card) => {
-      const owner = card.owner.toString();
-      if (req.user._id === owner) {
+      if (card.owner.equals(req.user._id)) {
         Card.deleteOne(card)
           .then(() => {
+            //res.status(200).send({ data: card })
             res.status(200).send(card);
           })
           .catch(() => {
-            return res.status(500).send({ message: "На сервере произошла ошибка" })
+            res.status(500).send({ message: "На сервере произошла ошибка" })
           })
       } else {
-        throw new Forbidden('Вы можете удалять только свои карточки');
+        throw new ForbiddenError("Нет прав на удаление карточки");
       }
-      // if (card.owner.equals(req.user._id)) {
-      //   Card.deleteOne(card)
-      //     .then(() => {
-      //       //res.status(200).send({ data: card })
-      //       return res.status(200).send(card);
-      //     })
-      //     .catch(() => {
-      //       return res.status(500).send({ message: "На сервере произошла ошибка" })
-      //     })
-      // } else {
-      //   throw new ForbiddenError("Нет прав на удаление карточки");
-      // }
     })
-  } catch {((err) => {
+    .catch((err) => {
       if (err.massage === "NotValidId") {
         return res.status(404).send({ message: "Карточка не найдена" });
        } else {
-        return res.status(500).send({ message: "На сервере произошла ошибка" })
+         res.status(500).send({ message: "На сервере произошла ошибка" })
        };
+      //res.status(500).send({ message: "На сервере произошла ошибка" })
     });
-  }
+
 };
 // module.exports.deleteCard = async (req, res) => {
 //   const objectID = req.params.cardId;
