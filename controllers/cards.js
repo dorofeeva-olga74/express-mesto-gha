@@ -25,23 +25,81 @@ module.exports.createCard = async (req, res) => {
   }
 };
 module.exports.deleteCard = async (req, res) => {
+  try {
   const objectID = req.params.cardId;
-  const validationRegExp = new RegExp(/\w{24}/gm);
-  const isValidate = validationRegExp.test(objectID);
-  if (!isValidate) {
-    return res.status(400).send({ message: "Переданы некорректные данные" });
-  }
-  Card.findByIdAndRemove(objectID)
-    .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: "Карточка не найдена" });
-      }
-      res.send({ data: card });
+  //const user = await User.findById(userId);
+  await Card.findById(objectID)
+    .orFail(() => {
+      throw new NotFoundError("Карточка не найдена");
+    //throw new Error("NotValidId");
     })
-    .catch(() =>
-      res.status(500).send({ message: "На сервере произошла ошибка" })
-    );
+    .then((card) => {
+      if (card.owner.equals(req.user._id)) {
+        Card.deleteOne(card)
+          .then(() => {
+            //res.status(200).send({ data: card })
+            return res.status(200).send(card);
+          })
+          .catch(() => {
+            return res.status(500).send({ message: "На сервере произошла ошибка" })
+          })
+      } else {
+        throw new ForbiddenError("Нет прав на удаление карточки");
+      }
+    })
+  } catch {((err) => {
+      if (err.massage === "NotValidId") {
+        return res.status(404).send({ message: "Карточка не найдена" });
+       } else {
+        return res.status(500).send({ message: "На сервере произошла ошибка" })
+       };
+    });
+  }
 };
+// module.exports.deleteCard = async (req, res) => {
+//   const objectID = req.params.cardId;
+//   Card.findByIdAndRemove(objectID)
+//   .orFail(() => {
+//     throw new Error("NotFound");
+//   })
+//     .then((card) => {
+//       if (!card) {
+//         return res.status(404).send({ message: "Карточка не найдена" });
+//       }
+//       res.send({ data: card });
+//     })
+//     .catch(() =>
+//       res.status(500).send({ message: "На сервере произошла ошибка" })
+//     );
+// };
+/////
+// module.exports.deleteCard = (req, res, next) => {
+//   const { cardId } = req.params;
+//   Card.findById(cardId)
+//     .orFail(() => {
+//       throw new NotFound('Карточка с указанным  _id не найдена');
+//     })
+//     .then((card) => {
+//       const owner = card.owner.toString();
+//       if (req.user._id === owner) {
+//         Card.deleteOne(card)
+//           .then(() => {
+//             res.status(200).send(card);
+//           })
+//           .catch(next);
+//       } else {
+//         throw new Forbidden('Вы можете удалять только свои карточки');
+//       }
+//     })
+//     .catch((err) => {
+//       if (err.name === 'CastError') {
+//         next(new BadRequest('Переданы некорректные данные'));
+//       } else {
+//         next(err);
+//       }
+//     });
+// };
+/////
 
 module.exports.likeCard = async (req, res) => {
   try {

@@ -55,9 +55,9 @@ module.exports.updateUser = async (req, res) => {
         .status(400)
         .send({ message: "Ошибка валидации полей", ...error });
     }
-    if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
-      return res.status(409).send({ message: "Пользователь уже существует" });
-    }
+    // if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
+    //   return res.status(409).send({ message: "Пользователь уже существует" });
+    // }
     return res.status(500).send({ message: "Ошибка на стороне сервера" });
   }
 };
@@ -74,9 +74,9 @@ module.exports.updateAvatar = async (req, res) => {
         .status(400)
         .send({ message: "Ошибка валидации полей", ...error });
     }
-    if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
-      return res.status(409).send({ message: "Пользователь уже существует" });
-    }
+    // if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
+    //   return res.status(409).send({ message: "Пользователь уже существует" });
+    // }
     return res.status(500).send({ message: "Ошибка на стороне сервера" });
   }
 };

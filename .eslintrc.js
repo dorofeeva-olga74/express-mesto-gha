@@ -1,6 +1,6 @@
 module.exports = {
   env: {
-    browser: true,
+   // browser: true,
     es2021: true,
   },
   extends: 'airbnb-base',
@@ -20,7 +20,7 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
-    'no-console': 'off',
+    //'no-console': 'off',
     quotes: [
       'error',
       'single',
@@ -28,3 +28,9 @@ module.exports = {
     'no-underscore-dangle': 'allow',
   },
 };
+// module.exports = {
+//   extends: 'airbnb-base',
+//   rules: {
+//     'no-underscore-dangle': ['error', { 'allow': ['_id']}]
+//    },
+// };
