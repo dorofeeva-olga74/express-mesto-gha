@@ -48,14 +48,16 @@ module.exports.deleteCard = async (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.massage === "NotValidId") {
-        return res.status(404).send({ message: "Карточка не найдена" });
-       } else {
-         res.status(500).send({ message: "На сервере произошла ошибка" })
+      if (err.massage === "NotFound") {
+        res.status(404).send({ message: "Карточка не найдена" });
+       }
+       if (err.name === "CastError") {
+        res.status(400).send({ message: "Переданы некорректные данные" });
+      } else {
+         res.status(500).send({ message: "Ошибка на стороне сервера" })
        };
       //res.status(500).send({ message: "На сервере произошла ошибка" })
     });
-
 };
 // module.exports.deleteCard = async (req, res) => {
 //   const objectID = req.params.cardId;
