@@ -47,11 +47,18 @@ module.exports.deleteCard = async (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        res.status(404).send({ message: "Карточка не найдена", ...err });
-       } else {
-        res.status(400).send({ message: "Переданы некорректные данные" });
+      // if (err.name === "CastError") {
+      //   res.status(404).send({ message: "Карточка не найдена", ...err });
+      //  } else {
+      //   res.status(400).send({ message: "Переданы некорректные данные" });
+      // }
+      if (err.message === "NotFound") {
+        return res.status(404).send({ message: "Карточка не найдена111" });
       }
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Передан не валидный id" });
+      }
+      return res.status(500).send({ message: "Ошибка на стороне сервера" })
       //res.status(500).send({ message: "На сервере произошла ошибка" })
     });
 };
