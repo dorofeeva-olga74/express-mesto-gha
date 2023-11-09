@@ -26,10 +26,9 @@ module.exports.createCard = async (req, res) => {
 };
 module.exports.deleteCard = async (req, res) => {
   const objectID = req.params.cardId;
-
   Card.findById(objectID)
     .orFail(() => {
-      throw new NotFoundError("Карточка не найдена");
+      throw new NotFoundError("Карточка не найдена***");
     //throw new Error("NotValidId");
     })
     .then((card) => {
@@ -40,18 +39,22 @@ module.exports.deleteCard = async (req, res) => {
             res.status(200).send(card);
             //res.status(200).send({ data: card })
           })
-          .catch(() => {
-            res.status(400).send({ message: "Передан не валидный id" })
+          .catch((err) => {
+            res.status(400).send({ message: "Передан не валидный id", ...err })
           })
       } else {
         throw new ForbiddenError("Нет прав на удаление карточки");
       }
     })
     .catch((err) => {
-      if (err.massage === "CastError") {
-        res.status(400).send({ message: "Переданы некорректные данные" });
-       } else {
+      if (err.name === "ValidationError") {
+        res.status(400).send({ message: "Ошибка валидации полей", ...err });
+       }
+       if (err.message === "NotFound") {
         res.status(404).send({ message: "Карточка не найдена" });
+      }
+      else {
+        res.status(500).send({ message: "На сервере произошла ошибка" });
       }
       //res.status(500).send({ message: "На сервере произошла ошибка" })
     });
