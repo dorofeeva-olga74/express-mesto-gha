@@ -1,7 +1,7 @@
 const Card = require('../models/Card');
 module.exports.getCards = async (req, res) => {
   try {
-    const cards = await Card.find({});
+    const cards = await Card.find({}).populate(['owner', 'likes']);
     return res.send(cards);
   } catch (error) {
     return res
@@ -28,7 +28,7 @@ module.exports.deleteCard = async (req, res) => {
   const objectID = req.params.cardId;
   Card.findById(objectID)
     .orFail(() => {
-      throw new NotFoundError("Карточка не найдена***");
+      throw new NotFoundError("Карточка не найдена");
     //throw new Error("NotValidId");
     })
     .then((card) => {
@@ -47,18 +47,10 @@ module.exports.deleteCard = async (req, res) => {
       }
     })
     .catch((err) => {
-      // if (err.name === "CastError") {
-      //   res.status(404).send({ message: "Карточка не найдена", ...err });
-      //  } else {
-      //   res.status(400).send({ message: "Переданы некорректные данные" });
-      // }
-      // if (err.message === "NotFound") {
-      //   return res.status(404).send({ message: "Карточка не найдена222" });
-      // }
       if (err.name === "CastError") {
         return res.status(400).send({ message: "Передан не валидный id" });
       }
-      return res.status(404).send({ message: "Карточка не найдена111" });
+      return res.status(404).send({ message: "Карточка не найдена" });
       //res.status(500).send({ message: "На сервере произошла ошибка" })
     });
 };

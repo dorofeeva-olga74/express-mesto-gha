@@ -13,7 +13,12 @@ const cardSchema = new mongoose.Schema({
     required: true// оно должно быть у каждого пользователя, так что имя — обязательное пол
   },
   owner: {//ссылка на модель автора карточки
-    type: mongoose.Schema.Types.ObjectId,
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+      }
+    ],
     required: true,
   },
   likes: {//список лайкнувших пост пользователей, массив ObjectId, по умолчанию — пустой массив (поле default);

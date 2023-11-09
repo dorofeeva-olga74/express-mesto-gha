@@ -20,17 +20,10 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
-    //'no-console': 'off',
     quotes: [
       'error',
       'single',
     ],
-    'no-underscore-dangle': 'allow',
+    'no-underscore-dangle': [{'allow': ["_id"]}],
   },
 };
-// module.exports = {
-//   extends: 'airbnb-base',
-//   rules: {
-//     'no-underscore-dangle': ['error', { 'allow': ['_id']}]
-//    },
-// };
