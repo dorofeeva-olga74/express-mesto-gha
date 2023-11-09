@@ -48,14 +48,11 @@ module.exports.deleteCard = async (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.massage === "NotFound") {
-        res.status(404).send({ message: "Карточка не найдена" });
-       }
-       if (err.name === "CastError") {
+      if (err.massage === "CastError") {
         res.status(400).send({ message: "Переданы некорректные данные" });
-      } else {
-         res.status(500).send({ message: "Ошибка на стороне сервера" })
-       };
+       } else {
+        res.status(404).send({ message: "Карточка не найдена" });
+      }
       //res.status(500).send({ message: "На сервере произошла ошибка" })
     });
 };
