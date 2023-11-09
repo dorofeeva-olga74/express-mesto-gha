@@ -25,20 +25,20 @@ module.exports.createCard = async (req, res) => {
   }
 };
 module.exports.deleteCard = async (req, res) => {
-  try {
   const objectID = req.params.cardId;
-  
+
   Card.findById(objectID)
     .orFail(() => {
       throw new NotFoundError("Карточка не найдена");
     //throw new Error("NotValidId");
     })
     .then((card) => {
-      if (card.owner.equals(req.user._id)) {
+      const owner = card.owner.toString();
+      if (req.user._id === owner) {
         Card.deleteOne(card)
           .then(() => {
-            //res.status(200).send({ data: card })
             res.status(200).send(card);
+            //res.status(200).send({ data: card })
           })
           .catch(() => {
             res.status(500).send({ message: "На сервере произошла ошибка" })
@@ -46,6 +46,18 @@ module.exports.deleteCard = async (req, res) => {
       } else {
         throw new ForbiddenError("Нет прав на удаление карточки");
       }
+      // if (card.owner.equals(req.user._id)) {
+      //   Card.deleteOne(card)
+      //     .then(() => {
+      //       //res.status(200).send({ data: card })
+      //       res.status(200).send(card);
+      //     })
+      //     .catch(() => {
+      //       res.status(500).send({ message: "На сервере произошла ошибка" })
+      //     })
+      // } else {
+      //   throw new ForbiddenError("Нет прав на удаление карточки");
+      // }
     })
     .catch((err) => {
       if (err.massage === "NotValidId") {
@@ -55,7 +67,6 @@ module.exports.deleteCard = async (req, res) => {
        };
       //res.status(500).send({ message: "На сервере произошла ошибка" })
     });
-
 };
 // module.exports.deleteCard = async (req, res) => {
 //   const objectID = req.params.cardId;
