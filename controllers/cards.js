@@ -41,23 +41,11 @@ module.exports.deleteCard = async (req, res) => {
             //res.status(200).send({ data: card })
           })
           .catch(() => {
-            res.status(500).send({ message: "На сервере произошла ошибка" })
+            res.status(400).send({ message: "Передан не валидный id" })
           })
       } else {
         throw new ForbiddenError("Нет прав на удаление карточки");
       }
-      // if (card.owner.equals(req.user._id)) {
-      //   Card.deleteOne(card)
-      //     .then(() => {
-      //       //res.status(200).send({ data: card })
-      //       res.status(200).send(card);
-      //     })
-      //     .catch(() => {
-      //       res.status(500).send({ message: "На сервере произошла ошибка" })
-      //     })
-      // } else {
-      //   throw new ForbiddenError("Нет прав на удаление карточки");
-      // }
     })
     .catch((err) => {
       if (err.massage === "NotValidId") {
@@ -67,6 +55,7 @@ module.exports.deleteCard = async (req, res) => {
        };
       //res.status(500).send({ message: "На сервере произошла ошибка" })
     });
+
 };
 // module.exports.deleteCard = async (req, res) => {
 //   const objectID = req.params.cardId;
