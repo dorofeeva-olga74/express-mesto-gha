@@ -68,13 +68,12 @@ module.exports.deleteCard = async (req, res) => {
       if (!card) {
         return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       }
-      if (!card) {
-        return res.status(BadRequest).send({ message: "Переданы некорректные данные" });
-      }
+      res.status(InternalServerError).send({ message: "На сервере произошла ошибка" })
       res.send({ data: card });
     })
-    .catch(() =>
-      res.status(InternalServerError).send({ message: "На сервере произошла ошибка" })
+    .catch(() => {
+      res.status(BadRequest).send({ message: "Переданы некорректные данные" });
+    }
     );
 };
 
