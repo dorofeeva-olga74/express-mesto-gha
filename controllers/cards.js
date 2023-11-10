@@ -1,13 +1,8 @@
-// const httpConstants = require("http2").constants;//200//status(httpConstants.HTTP_STATUS_OK)
-// const BadRequest = require("../errors/BadRequest");//400
-// const NotFoundError = require("../errors/NotFoundError");//404
-// const ForbiddenError = require("../errors/ForbiddenError");//403
-// const InternalServerError = require("../errors/InternalServerError");//500
-const StatusOK = 200;//require("http2").constants;//200
-const BadRequest = 400;//require("../errors/BadRequest");//400
-const NotFoundError = 404;//require("../errors/NotFoundError");//404
-const InternalServerError = 500;//require("../errors/InternalServerError");//500
-
+// const StatusOK = 200;//require("http2").constants;//200
+// const BadRequest = 400;//require("../errors/BadRequest");//400
+// const NotFoundError = 404;//require("../errors/NotFoundError");//404
+// const InternalServerError = 500;//require("../errors/InternalServerError");//500
+const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, InternalServerError } = require("../errors/errors");
 //const ERROR_CODE = 400;
 //if (err.name === 'SomeErrorName') return res.status(ERROR_CODE).send(...)
 
@@ -29,7 +24,7 @@ module.exports.createCard = async (req, res) => {
   try {
     const { name, link } = req.body;
     const newCard = await new Card({ name, link, owner: req.user._id });
-    return res.status(201).send(await newCard.save());
+    return res.status(StatusCreatedOK).send(await newCard.save());
   } catch (err) {
     if (err.name === "ValidationError") {
       return res

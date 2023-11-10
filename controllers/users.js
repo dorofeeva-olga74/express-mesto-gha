@@ -1,9 +1,9 @@
-const StatusOK = 200;//require("http2").constants;//200
-const BadRequest = 400;//require("../errors/BadRequest");//400
-const NotFoundError = 404;//require("../errors/NotFoundError");//404
-const Conflict = 409;//require("../errors/Conflict");//409
-const InternalServerError = 500;//require("../errors/InternalServerError");//500
-
+// const StatusOK = 200;//require("http2").constants;//200
+// const BadRequest = 400;//require("../errors/BadRequest");//400
+// const NotFoundError = 404;//require("../errors/NotFoundError");//404
+// const Conflict = 409;//require("../errors/Conflict");//409
+// const InternalServerError = 500;//require("../errors/InternalServerError");//500
+const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, Conflict, InternalServerError } = require("../errors/errors");
 const User = require('../models/User');
 const ERROR_CODE_DUPLICATE_MONGO = 11000;//вынесены магические числа
 
@@ -38,7 +38,7 @@ module.exports.getUserById = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   try {
     const newUser = await new User(req.body);
-    return res.status(201).send(await newUser.save());//httpConstants.HTTP_STATUS_OK
+    return res.status(StatusCreatedOK).send(await newUser.save());//httpConstants.HTTP_STATUS_OK
   } catch (err) {
     if (err.name === "ValidationError") {
       return res
