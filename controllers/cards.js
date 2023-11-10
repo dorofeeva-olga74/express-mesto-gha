@@ -1,8 +1,13 @@
-const httpConstants = require("http2").constants;//200//status(httpConstants.HTTP_STATUS_OK)
-const BadRequest = require("../errors/BadRequest");//400
-const NotFoundError = require("../errors/NotFoundError");//404
-const ForbiddenError = require("../errors/ForbiddenError");//403
-const InternalServerError = require("../errors/InternalServerError");//500
+// const httpConstants = require("http2").constants;//200//status(httpConstants.HTTP_STATUS_OK)
+// const BadRequest = require("../errors/BadRequest");//400
+// const NotFoundError = require("../errors/NotFoundError");//404
+// const ForbiddenError = require("../errors/ForbiddenError");//403
+// const InternalServerError = require("../errors/InternalServerError");//500
+const StatusOK = 200;//require("http2").constants;//200
+const BadRequest = 400;//require("../errors/BadRequest");//400
+const NotFoundError = 404;//require("../errors/NotFoundError");//404
+const InternalServerError = 500;//require("../errors/InternalServerError");//500
+
 //const ERROR_CODE = 400;
 //if (err.name === 'SomeErrorName') return res.status(ERROR_CODE).send(...)
 
@@ -45,7 +50,7 @@ module.exports.deleteCard = async (req, res) => {
       if (req.user._id === owner) {
         Card.deleteOne(card)
           .then(() => {
-            res.status(httpConstants.HTTP_STATUS_OK).send(card);
+            res.status(StatusOK).send(card);
             //res.status(200).send({ data: card })
           })
           .catch((err) => {
@@ -141,7 +146,7 @@ module.exports.dislikeCard = async (req, res) => {
       throw new Error("NotFoundError");
     }
     return res
-      .status(httpConstants.HTTP_STATUS_OK)
+      .status(StatusOK)
       .send(await dislike.save());
   } catch (err) {
     if (err.message === "NotFoundError") {

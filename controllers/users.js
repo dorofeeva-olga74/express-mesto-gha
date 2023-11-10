@@ -1,8 +1,8 @@
-const httpConstants = require("http2").constants;//200
+const StatusOK = 200;//require("http2").constants;//200
 const BadRequest = 400;//require("../errors/BadRequest");//400
-const NotFoundError = require("../errors/NotFoundError");//404
-const Conflict = require("../errors/Conflict");//409
-const InternalServerError = require("../errors/InternalServerError");//500
+const NotFoundError = 404;//require("../errors/NotFoundError");//404
+const Conflict = 409;//require("../errors/Conflict");//409
+const InternalServerError = 500;//require("../errors/InternalServerError");//500
 
 const User = require('../models/User');
 const ERROR_CODE_DUPLICATE_MONGO = 11000;//вынесены магические числа
@@ -24,7 +24,7 @@ module.exports.getUserById = async (req, res) => {
     if (!user) {
       throw new Error("NotFound");
     }
-    return res.status(httpConstants.HTTP_STATUS_OK).send(user);
+    return res.status(StatusOK).send(user);
   } catch (err) {
     if (err.message === "NotFound") {
       return res.status(NotFoundError).send({ message: "Пользователь по id не найден" });
@@ -54,7 +54,7 @@ module.exports.updateUser = async (req, res) => {
   try {
     const {name, about} = req.body;
     const updateUser = await User.findByIdAndUpdate(req.user._id, {name, about}, { new: "true", runValidators: "true" } );
-    return res.status(httpConstants.HTTP_STATUS_OK).send(await updateUser.save());
+    return res.status(StatusOK).send(await updateUser.save());
   } catch (err) {
     if (err.name === "ValidationError") {
       return res
@@ -72,7 +72,7 @@ module.exports.updateAvatar = async (req, res) => {
     const {avatar} = req.body;
     //console.log(req.body)
     const updateAvatar = await User.findByIdAndUpdate(req.user._id, {avatar}, { new: "true", runValidators: "true" } );
-    return res.status(httpConstants.HTTP_STATUS_OK).send(updateAvatar);
+    return res.status(StatusOK).send(updateAvatar);
     //return res.status(200).send(updateAvatar);
   } catch (err) {
     if (err.name === "ValidationError") {
