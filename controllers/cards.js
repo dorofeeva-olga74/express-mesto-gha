@@ -76,7 +76,7 @@ module.exports.likeCard = async (req, res) => {
     if (err.message === "NotFound") {
       return res.status(NotFoundError).send({ message: "Карточка не найдена"});
     }
-    if (err.name === "ValidationError") {
+    if (err.name === "CastError") {
       return res.status(BadRequest).send({ message: "Передан не валидный id" });
     }
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
