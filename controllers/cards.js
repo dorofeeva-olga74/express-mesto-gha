@@ -26,38 +26,56 @@ module.exports.createCard = async (req, res) => {
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
+// module.exports.deleteCard = async (req, res) => {
+//   const objectID = req.params.cardId;
+//   Card.findById(objectID)
+//     .orFail(() => {
+//       throw new NotFoundError("Карточка не найдена");
+//     })
+//     .then((card) => {
+//       const owner = card.owner.toString();
+//       if (req.user._id === owner) {
+//         Card.deleteOne(card)
+//           .then(() => {
+//             res.status(StatusOK).send(card);
+//           })
+//           .catch((err) => {
+//             if (err.name === "CastError") {
+//               return res.status(BadRequest).send({ message: "Передан не валидный id" });
+//             }
+//           })
+//       } else {
+//         throw new ForbiddenError("Нет прав на удаление карточки");
+//       }
+//     })
+//     .catch((err) => {
+//       if (err.name === "CastError") {
+//         return res.status(BadRequest).send({ message: "Передан не валидный id" });
+//       }
+//       // if (err.message === "NotFound") {
+//       //   return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+//       // }
+//       return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+//     })
+// };
 module.exports.deleteCard = async (req, res) => {
   const objectID = req.params.cardId;
-  Card.findById(objectID)
-    .orFail(() => {
-      throw new NotFoundError("Карточка не найдена");
-    })
+  // if (!isValidate) {
+  //   return res.status(400).send({ message: "Переданы некорректные данные" });
+  // }
+  Card.findByIdAndRemove(objectID)
     .then((card) => {
-      const owner = card.owner.toString();
-      if (req.user._id === owner) {
-        Card.deleteOne(card)
-          .then(() => {
-            res.status(StatusOK).send(card);
-          })
-          .catch((err) => {
-            if (err.name === "CastError") {
-              return res.status(BadRequest).send({ message: "Передан не валидный id" });
-            }
-          })
-      } else {
-        throw new ForbiddenError("Нет прав на удаление карточки");
+      if (!card) {
+        return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       }
+      res.send({ data: card });
     })
-    .catch((err) => {
-      if (err.name === "CastError") {
-        return res.status(BadRequest).send({ message: "Передан не валидный id" });
-      }
-      // if (err.message === "NotFound") {
-      //   return res.status(NotFoundError).send({ message: "Карточка не найдена" });
-      // }
-      return res.status(NotFoundError).send({ message: "Карточка не найдена" });
-    })
+    .catch(() =>
+      res.status(InternalServerError).send({ message: "На сервере произошла ошибка" })
+    );
 };
+
+
 module.exports.likeCard = async (req, res) => {
   try {
     const likesCard = await Card.findByIdAndUpdate(
@@ -69,17 +87,17 @@ module.exports.likeCard = async (req, res) => {
       throw new Error("NotFoundError");
     }
     return res
-      .status(201)
+      .status(StatusCreatedOK)
       .send(await likesCard.save());
   } catch (err) {
     if (err.message === "NotFound") {
       return res.status(NotFoundError).send({ message: "Карточка не найдена" });
     }
-    // if (err.name === "CastError") {
-    //   return res.status(BadRequest).send({ message: "Передан не валидный id" });
-    // }
-    return res.status(BadRequest).send({ message: "Передан не валидный id" });
-    // return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+    if (err.name === "CastError") {
+      return res.status(BadRequest).send({ message: "Передан не валидный id" });
+    }
+    //return res.status(BadRequest).send({ message: "Передан не валидный id" });
+    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 }
 module.exports.dislikeCard = async (req, res) => {
