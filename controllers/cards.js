@@ -52,9 +52,10 @@ module.exports.deleteCard = async (req, res) => {
       if (err.name === "CastError") {
         return res.status(BadRequest).send({ message: "Передан не валидный id" });
       }
-      if (err.message === "NotFound") {
-        return res.status(NotFoundError).send({ message: "Карточка не найдена" });
-      }  //return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+      // if (err.message === "NotFound") {
+      //   return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+      // }
+      return res.status(NotFoundError).send({ message: "Карточка не найдена" });
     })
 };
 module.exports.likeCard = async (req, res) => {
@@ -74,9 +75,10 @@ module.exports.likeCard = async (req, res) => {
     if (err.message === "NotFound") {
       return res.status(NotFoundError).send({ message: "Карточка не найдена" });
     }
-    if (err.name === "CastError") {
-      return res.status(BadRequest).send({ message: "Передан не валидный id" });
-    }
+    // if (err.name === "CastError") {
+    //   return res.status(BadRequest).send({ message: "Передан не валидный id" });
+    // }
+    return res.status(BadRequest).send({ message: "Передан не валидный id" });
     // return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 }
