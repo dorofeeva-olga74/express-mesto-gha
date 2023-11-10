@@ -1,5 +1,5 @@
 const httpConstants = require("http2").constants;//200
-const BadRequest = require("../errors/BadRequest");//400
+const BadRequestError = require("../errors/BadRequest");//400
 const NotFoundError = require("../errors/NotFoundError");//404
 const Conflict = require("../errors/Conflict");//409
 const InternalServerError = require("../errors/InternalServerError");//500
@@ -30,7 +30,7 @@ module.exports.getUserById = async (req, res) => {
       return res.status(NotFoundError).send({ message: "Пользователь по id не найден" });
     }
     if (err.name === "CastError") {
-      return res.status(BadRequest).send({ message: "Передан не валидный id" });
+      return res.status(BadRequestError).send({ message: "Передан не валидный id" });
     }
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
@@ -42,7 +42,7 @@ module.exports.createUser = async (req, res) => {
   } catch (err) {
     if (err.name === "ValidationError") {
       return res
-        .status(400)//BadRequest
+        .status(BadRequestError)//
         .send({ message: "Ошибка валидации полей"});
     }
     if (err.code === ERROR_CODE_DUPLICATE_MONGO) {
@@ -58,7 +58,7 @@ module.exports.updateUser = async (req, res) => {
   } catch (err) {
     if (err.name === "ValidationError") {
       return res
-        .status(BadRequest)
+        .status(BadRequestError)
         .send({ message: "Ошибка валидации полей", ...err });
     }
     // if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
@@ -77,7 +77,7 @@ module.exports.updateAvatar = async (req, res) => {
   } catch (err) {
     if (err.name === "ValidationError") {
       return res
-        .status(BadRequest)
+        .status(BadRequestError)
         .send({ message: "Ошибка валидации полей", ...err });
     }
     // if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
