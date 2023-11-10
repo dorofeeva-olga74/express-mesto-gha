@@ -68,15 +68,17 @@ module.exports.deleteCard = async (req, res) => {
       if (!card) {
         return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       }
-      res.status(InternalServerError).send({ message: "На сервере произошла ошибка" })
       res.send({ data: card });
     })
     .catch(() => {
-      res.status(BadRequest).send({ message: "Переданы некорректные данные" });
-    }
-    );
-};
-
+      if (err.name === 'CastError') {
+        next(BadRequest('Переданы некорректные данные'));
+      } else {
+        res.status(InternalServerError).send({ message: "На сервере произошла ошибка" });
+      };
+      //res.status(BadRequest).send({ message: "Переданы некорректные данные" });
+    })
+  }
 
 module.exports.likeCard = async (req, res) => {
   try {
