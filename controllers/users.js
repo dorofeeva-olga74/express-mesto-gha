@@ -38,11 +38,11 @@ module.exports.getUserById = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   try {
     const newUser = await new User(req.body);
-    return res.status(httpConstants.HTTP_STATUS_OK).send(await newUser.save());
+    return res.status(201).send(await newUser.save());//httpConstants.HTTP_STATUS_OK
   } catch (err) {
     if (err.name === "ValidationError") {
       return res
-        .status(BadRequest)
+        .status(400)//BadRequest
         .send({ message: "Ошибка валидации полей"});
     }
     if (err.code === ERROR_CODE_DUPLICATE_MONGO) {
