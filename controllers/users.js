@@ -1,8 +1,3 @@
-// const StatusOK = 200;//require("http2").constants;//200
-// const BadRequest = 400;//require("../errors/BadRequest");//400
-// const NotFoundError = 404;//require("../errors/NotFoundError");//404
-// const Conflict = 409;//require("../errors/Conflict");//409
-// const InternalServerError = 500;//require("../errors/InternalServerError");//500
 const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, Conflict, InternalServerError } = require("../errors/errors");
 const User = require('../models/User');
 const ERROR_CODE_DUPLICATE_MONGO = 11000;//вынесены магические числа
@@ -48,6 +43,7 @@ module.exports.createUser = async (req, res) => {
     if (err.code === ERROR_CODE_DUPLICATE_MONGO) {
       return res.status(Conflict).send({ message: "Пользователь уже существует" });
     }
+    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
 module.exports.updateUser = async (req, res) => {
@@ -61,28 +57,20 @@ module.exports.updateUser = async (req, res) => {
         .status(BadRequest)
         .send({ message: "Ошибка валидации полей", ...err });
     }
-    // if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
-    //   return res.status(409).send({ message: "Пользователь уже существует" });
-    // }
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
 module.exports.updateAvatar = async (req, res) => {
   try {
     const {avatar} = req.body;
-    //console.log(req.body)
     const updateAvatar = await User.findByIdAndUpdate(req.user._id, {avatar}, { new: "true", runValidators: "true" } );
     return res.status(StatusOK).send(updateAvatar);
-    //return res.status(200).send(updateAvatar);
   } catch (err) {
     if (err.name === "ValidationError") {
       return res
         .status(BadRequest)
         .send({ message: "Ошибка валидации полей", ...err });
     }
-    // if (error.code === ERROR_CODE_DUPLICATE_MONGO) {
-    //   return res.status(409).send({ message: "Пользователь уже существует" });
-    // }
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
