@@ -27,7 +27,6 @@ module.exports.createCard = async (req, res) => {
   }
 };
 module.exports.deleteCard = async (req, res) => {
-  try {
   const objectID = req.params.cardId;
   Card.findById(objectID)
     .orFail(() => {
@@ -47,16 +46,18 @@ module.exports.deleteCard = async (req, res) => {
         throw new ForbiddenError("Нет прав на удаление карточки");
       }
     })
-    } catch(err) {
+    .catch((err) => {
       if (err.name === "CastError") {
         return res.status(BadRequest).send({ message: "Передан не валидный id" });
       }
       if (err.message === "NotFound") {
         return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       }
+    })
+    .finally (() => {
       //return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
-    };
+    });
 };
 module.exports.likeCard = async (req, res) => {
   try {
