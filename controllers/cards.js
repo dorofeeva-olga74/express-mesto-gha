@@ -52,10 +52,10 @@ module.exports.deleteCard = async (req, res) => {
       }
       if (err.message === "NotFound") {
         return res.status(NotFoundError).send({ message: "Карточка не найдена" });
-      } else {
+      }
       //return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
-      }
+      
     });
 };
 module.exports.likeCard = async (req, res) => {
