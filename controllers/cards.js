@@ -40,7 +40,9 @@ module.exports.deleteCard = async (req, res) => {
             res.status(StatusOK).send(card);
           })
           .catch((err) => {
-            res.status(BadRequest).send({ message: "Передан не валидный id", ...err })
+            res
+            .status(BadRequest)
+            .send({ message: "Передан не валидный id", ...err })
           })
       } else {
         throw new ForbiddenError("Нет прав на удаление карточки");
@@ -53,8 +55,6 @@ module.exports.deleteCard = async (req, res) => {
       if (err.message === "NotFound") {
         return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       }
-    })
-    .finally (() => {
       //return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
     });
@@ -74,12 +74,12 @@ module.exports.likeCard = async (req, res) => {
       .send(await likesCard.save());
   } catch (err) {
     if (err.message === "NotFound") {
-      return res.status(NotFoundError).send({ message: "Карточка не найдена", ...err });
+      return res.status(NotFoundError).send({ message: "Карточка не найдена"});
     }
-    if (err.name === "CastError") {
+    if (err.name === "ValidationError") {
       return res.status(BadRequest).send({ message: "Передан не валидный id" });
     }
-      return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+      res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
     }
 }
 module.exports.dislikeCard = async (req, res) => {
