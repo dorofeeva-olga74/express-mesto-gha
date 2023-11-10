@@ -68,6 +68,9 @@ module.exports.deleteCard = async (req, res) => {
       if (!card) {
         return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       }
+      if (!card) {
+        return res.status(BadRequest).send({ message: "Переданы некорректные данные" });
+      }
       res.send({ data: card });
     })
     .catch(() =>
