@@ -1,5 +1,5 @@
 const httpConstants = require("http2").constants;//200
-const BadRequest = require("../errors/BadRequest");//400
+const BadRequest = 400;//require("../errors/BadRequest");//400
 const NotFoundError = require("../errors/NotFoundError");//404
 const Conflict = require("../errors/Conflict");//409
 const InternalServerError = require("../errors/InternalServerError");//500
