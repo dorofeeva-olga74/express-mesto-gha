@@ -76,8 +76,9 @@ module.exports.likeCard = async (req, res) => {
     }
     if (err.name === "CastError") {
       return res.status(BadRequest).send({ message: "Передан не валидный id" });
-    }
+    } else {
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+    }
   }
 }
 module.exports.dislikeCard = async (req, res) => {
