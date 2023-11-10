@@ -38,7 +38,7 @@ module.exports.getUserById = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   try {
     const newUser = await new User(req.body);
-    return res.status(201).send(await newUser.save());
+    return res.status(httpConstants.HTTP_STATUS_OK).send(await newUser.save());
   } catch (err) {
     if (err.name === "ValidationError") {
       return res
