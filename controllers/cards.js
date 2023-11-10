@@ -27,6 +27,7 @@ module.exports.createCard = async (req, res) => {
   }
 };
 module.exports.deleteCard = async (req, res) => {
+  try {
   const objectID = req.params.cardId;
   Card.findById(objectID)
     .orFail(() => {
@@ -46,7 +47,7 @@ module.exports.deleteCard = async (req, res) => {
         throw new ForbiddenError("Нет прав на удаление карточки");
       }
     })
-    .catch((err) => {
+    } catch(err) {
       if (err.name === "CastError") {
         return res.status(BadRequest).send({ message: "Передан не валидный id" });
       }
@@ -55,8 +56,7 @@ module.exports.deleteCard = async (req, res) => {
       }
       //return res.status(NotFoundError).send({ message: "Карточка не найдена" });
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
-      
-    });
+    };
 };
 module.exports.likeCard = async (req, res) => {
   try {
@@ -77,10 +77,9 @@ module.exports.likeCard = async (req, res) => {
     }
     if (err.name === "CastError") {
       return res.status(BadRequest).send({ message: "Передан не валидный id" });
-    } else {
+    }
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
     }
-  }
 }
 module.exports.dislikeCard = async (req, res) => {
   try {
