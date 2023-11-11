@@ -27,7 +27,7 @@ module.exports.createCard = async (req, res) => {
   }
 };
 
-module.exports.deleteCard = async (req, res) => {
+module.exports.deleteCard = async (req, res, next) => {
   const objectID = req.params.cardId;
   await Card.findById(objectID)
     .orFail(() => {
@@ -40,21 +40,14 @@ module.exports.deleteCard = async (req, res) => {
           .then(() => {
             res.status(StatusOK).send(card);
           })
-          .catch((err) => {
-            if (err.name === 'CastError') {
-              res.status(BadRequest).send({ message: "Передан не валидный id"})
-            }
-          })
-      }
-      if (!req.user._id === owner) {
-        res.status(ForbiddenError).send({ message: "Нет прав на удаление карточки"});
+          .catch(next);
       } else {
-        return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+        res.status(ForbiddenError).send({ message: "Нет прав на удаление карточки"});
       }
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BadRequest).send({ message: "Передан не валидный id" });
+        res.status(BadRequest).send({ message: "Передан не валидный id" });
       }
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
     });
