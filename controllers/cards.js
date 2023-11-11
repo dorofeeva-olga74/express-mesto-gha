@@ -81,31 +81,56 @@ module.exports.createCard = async (req, res) => {
 // }
 module.exports.deleteCard = async (req, res) => {
   const objectID = req.params.cardId;
-  //const validationRegExp = new RegExp(/\w{24}/gm);
-  //const isValidate = validationRegExp.test(objectID);
-  // if (!isValidate) {
-  //   return res.status(400).send({ message: "Переданы некорректные данные" });
-  // }
-  Card.findByIdAndRemove(objectID)
+  Card.findById(objectID)
     .orFail(() => {
-      if (err.message === "NotFound") {
-        return res.status(NotFoundError).send({ message: "Карточка не найдена" });
-        }
-      //throw new NotFound('Карточка с указанным  _id не найдена');
+      throw new NotFoundError("Карточка не найдена");
+    //throw new Error("NotValidId");
     })
     .then((card) => {
-      if (!card.owner.equals(req.user._id)) {
-        throw new ForbiddenError("Нет доступа для удаления карточки");
-        }
-      if (!card) {
-        return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+      const owner = card.owner.toString();
+      if (req.user._id === owner) {
+        Card.deleteOne(card)
+          .then(() => {
+            res.status(StatusOK).send(card);
+            //res.status(200).send({ data: card })
+          })
+          .catch((err) => {
+            res.status(BadRequest).send({ message: "Передан не валидный id", ...err })
+          })
+      } else {
+        throw new ForbiddenError("Нет прав на удаление карточки");
       }
-      res.send({ data: card });
     })
-    .catch(() =>
-      res.status(500).send({ message: "На сервере произошла ошибка" })
-    );
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(BadRequest).send({ message: "Передан не валидный id" });
+      }
+      return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+      //res.status(500).send({ message: "На сервере произошла ошибка" })
+    });
 };
+// module.exports.deleteCard = async (req, res) => {
+//   const objectID = req.params.cardId;
+//   Card.findByIdAndRemove(objectID)
+//     .orFail(() => {
+//       if (err.message === "NotFound") {
+//         return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+//         }
+//       //throw new NotFound('Карточка с указанным  _id не найдена');
+//     })
+//     .then((card) => {
+//       if (!card.owner.equals(req.user._id)) {
+//         throw new ForbiddenError("Нет доступа для удаления карточки");
+//         }
+//       if (!card) {
+//         return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+//       }
+//       res.send({ data: card });
+//     })
+//     .catch(() =>
+//       res.status(500).send({ message: "На сервере произошла ошибка" })
+//     );
+// };
 module.exports.likeCard = async (req, res) => {
   try {
     const likesCard = await Card.findByIdAndUpdate(
@@ -147,10 +172,32 @@ module.exports.dislikeCard = async (req, res) => {
     if (err.message === "NotFoundError") {
       return res.status(NotFoundError).send({ message: "Карточка не найдена" });
     }
-
     if (err.name === "CastError") {
       return res.status(BadRequest).send({ message: "Передан не валидный id" });
     }
-    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 }
+// module.exports.dislikeCard = async (req, res) => {
+//   try {
+//     const dislike = await Card.findByIdAndUpdate(
+//       req.params.cardId,
+//       { $pull: { likes: req.user._id } }, // убрать _id из массива
+//       { new: true },
+//     )
+//     if (!dislike) {
+//       throw new Error("NotFoundError");
+//     }
+//     return res
+//       .status(StatusOK)
+//       .send(await dislike.save());
+//   } catch (err) {
+//     if (err.message === "NotFoundError") {
+//       return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+//     }
+
+//     if (err.name === "CastError") {
+//       return res.status(BadRequest).send({ message: "Передан не валидный id" });
+//     }
+//     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+//   }
+// }
