@@ -29,7 +29,7 @@ module.exports.createCard = async (req, res) => {
 
 module.exports.deleteCard = async (req, res) => {
   const objectID = req.params.cardId;
-  Card.findById(objectID)
+  await Card.findById(objectID)
     .orFail(() => {
       return res.status(NotFoundError).send({ message: "Карточка не найдена" });
     })
@@ -38,11 +38,11 @@ module.exports.deleteCard = async (req, res) => {
       if (req.user._id === owner) {
         Card.deleteOne(card)
           .then(() => {
-            res.status(StatusOK).send(card, { message: "Карточка удалена" });
+            res.status(StatusOK).send(card);
           })
           .catch((err) => {
             if (err.name === 'CastError') {
-              res.status(BadRequest).send({ message: "Передан не валидный id", ...err })
+              res.status(BadRequest).send({ message: "Передан не валидный id"})
             }
           })
       } else {
@@ -50,9 +50,9 @@ module.exports.deleteCard = async (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === "CastError") {
-        return res.status(BadRequest).send({ message: "Передан не валидный id111" });
-      }
+      // if (err.name === "CastError") {
+      //   return res.status(BadRequest).send({ message: "Передан не валидный id" });
+      // }
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
     });
 };
