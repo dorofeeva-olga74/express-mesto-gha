@@ -58,27 +58,54 @@ module.exports.createCard = async (req, res) => {
 //       return res.status(NotFoundError).send({ message: "Карточка не найдена" });
 //     })
 // };
+// module.exports.deleteCard = async (req, res) => {
+//   try {
+//   const objectID = req.params.cardId;
+//   if (!cardRemove.owner.equals(req.user._id)) {
+//     throw new ForbiddenError("Нет доступа для удаления карточки");
+//   }
+//   const cardRemove = await Card.findByIdAndRemove(objectID);
+//   // if (!card) {
+//   //   return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+//   // }
+//   return res.status(StatusOK).send({ message: "Карточка удалена" });
+//   } catch {
+//     if (err.message === "NotFound") {
+//       return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+//     }
+//     if (err.name === "CastError") {
+//       return res.status(BadRequest).send({ message: 'Переданы некорректные данные' });
+//     }
+//     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+//   }
+// }
 module.exports.deleteCard = async (req, res) => {
-  try {
   const objectID = req.params.cardId;
-  if (!cardRemove.owner.equals(req.user._id)) {
-    throw new ForbiddenError("Нет доступа для удаления карточки");
-  }
-  const cardRemove = await Card.findByIdAndRemove(objectID);
-  // if (!card) {
-  //   return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+  //const validationRegExp = new RegExp(/\w{24}/gm);
+  //const isValidate = validationRegExp.test(objectID);
+  // if (!isValidate) {
+  //   return res.status(400).send({ message: "Переданы некорректные данные" });
   // }
-  return res.status(StatusOK).send({ message: "Карточка удалена" });
-  } catch {
-    if (err.message === "NotFound") {
-      return res.status(NotFoundError).send({ message: "Карточка не найдена" });
-    }
-    if (err.name === "CastError") {
-      return res.status(BadRequest).send({ message: 'Переданы некорректные данные' });
-    }
-    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
-  }
-}
+  Card.findByIdAndRemove(objectID)
+    .orFail(() => {
+      if (err.message === "NotFound") {
+        return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+        }
+      //throw new NotFound('Карточка с указанным  _id не найдена');
+    })
+    .then((card) => {
+      if (!card.owner.equals(req.user._id)) {
+        throw new ForbiddenError("Нет доступа для удаления карточки");
+        }
+      if (!card) {
+        return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+      }
+      res.send({ data: card });
+    })
+    .catch(() =>
+      res.status(500).send({ message: "На сервере произошла ошибка" })
+    );
+};
 module.exports.likeCard = async (req, res) => {
   try {
     const likesCard = await Card.findByIdAndUpdate(
