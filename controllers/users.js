@@ -1,15 +1,14 @@
 const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, Conflict, InternalServerError } = require("../errors/errors");
 const User = require('../models/User');
 const ERROR_CODE_DUPLICATE_MONGO = 11000;//вынесены магические числа
+const mongoose = require("mongoose");
 
 module.exports.getUsers = async (req, res) => {
   try {
     const users = await User.find({});
     return res.send(users);
   } catch (err) {
-    return res
-      .status(InternalServerError)
-      .send({ message: "Ошибка на стороне сервера", err: err.message });
+    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера", err: err.message });
   }
 };
 module.exports.getUserById = async (req, res) => {
@@ -24,7 +23,7 @@ module.exports.getUserById = async (req, res) => {
     if (err.message === "NotFound") {
       return res.status(NotFoundError).send({ message: "Пользователь по id не найден" });
     }
-    if (err.name === "CastError") {
+    if (err instanceof mongoose.Error.ValidationError) {
       return res.status(BadRequest).send({ message: "Передан не валидный id" });
     }
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
@@ -36,9 +35,7 @@ module.exports.createUser = async (req, res) => {
     return res.status(StatusCreatedOK).send(await newUser.save());//httpConstants.HTTP_STATUS_OK
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res
-        .status(BadRequest)//
-        .send({ message: "Ошибка валидации полей"});
+      return res.status(BadRequest).send({ message: "Переданы некорректные данные"});
     }
     if (err.code === ERROR_CODE_DUPLICATE_MONGO) {
       return res.status(Conflict).send({ message: "Пользователь уже существует" });
@@ -53,9 +50,7 @@ module.exports.updateUser = async (req, res) => {
     return res.status(StatusOK).send(await updateUser.save());
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res
-        .status(BadRequest)
-        .send({ message: "Ошибка валидации полей", ...err });
+      return res.status(BadRequest).send({ message: "Переданы некорректные данные", ...err });
     }
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
@@ -67,9 +62,7 @@ module.exports.updateAvatar = async (req, res) => {
     return res.status(StatusOK).send(updateAvatar);
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res
-        .status(BadRequest)
-        .send({ message: "Ошибка валидации полей", ...err });
+      return res.status(BadRequest).send({ message: "Переданы некорректные данные", ...err });
     }
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
