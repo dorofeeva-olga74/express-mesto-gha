@@ -50,9 +50,9 @@ module.exports.deleteCard = async (req, res) => {
       }
     })
     .catch((err) => {
-      // if (err.name === "CastError") {
-      //   return res.status(BadRequest).send({ message: "Передан не валидный id" });
-      // }
+      if (err.name === "CastError") {
+        return res.status(BadRequest).send({ message: "Передан не валидный id" });
+      }
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
     });
 };
