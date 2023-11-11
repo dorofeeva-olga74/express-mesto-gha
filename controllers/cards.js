@@ -60,11 +60,11 @@ module.exports.createCard = async (req, res) => {
 // };
 module.exports.deleteCard = async (req, res) => {
   try {
-  const objectID = await req.params.cardId;
-  if (!card.owner.equals(req.user._id)) {
+  const objectID = req.params.cardId;
+  if (!cardRemove.owner.equals(req.user._id)) {
     throw new ForbiddenError("Нет доступа для удаления карточки");
   }
-  Card.findByIdAndRemove(objectID);
+  const cardRemove = await Card.findByIdAndRemove(objectID);
   // if (!card) {
   //   return res.status(NotFoundError).send({ message: "Карточка не найдена" });
   // }
