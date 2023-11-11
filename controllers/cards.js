@@ -1,4 +1,4 @@
-const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, InternalServerError } = require("../errors/errors");
+const { StatusOK, StatusCreatedOK, BadRequest, ForbiddenError, NotFoundError, InternalServerError } = require("../errors/errors");
 const Card = require('../models/Card');
 module.exports.getCards = async (req, res) => {
   try {
@@ -59,27 +59,26 @@ module.exports.createCard = async (req, res) => {
 //     })
 // };
 module.exports.deleteCard = async (req, res) => {
-  const objectID = req.params.cardId;
-  // if (!isValidate) {
-  //   return res.status(400).send({ message: "Переданы некорректные данные" });
-  // }
-  Card.findByIdAndRemove(objectID)
-    .then((card) => {
-      if (!card) {
-        return res.status(NotFoundError).send({ message: "Карточка не найдена" });
-      }
-      res.send({ data: card });
-    })
-    .catch(() => {
-      if (err.name === 'CastError') {
-        next(BadRequest('Переданы некорректные данные'));
-      } else {
-        res.status(InternalServerError).send({ message: "На сервере произошла ошибка" });
-      };
-      //res.status(BadRequest).send({ message: "Переданы некорректные данные" });
-    })
+  try {
+  const objectID = await req.params.cardId;
+  if (!card.owner.equals(req.user._id)) {
+    throw new ForbiddenError("Нет доступа для удаления карточки");
   }
-
+  Card.findByIdAndRemove(objectID);
+  // if (!card) {
+  //   return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+  // }
+  return res.status(StatusOK).send({ message: "Карточка удалена" });
+  } catch {
+    if (err.message === "NotFound") {
+      return res.status(NotFoundError).send({ message: "Карточка не найдена" });
+    }
+    if (err.name === "CastError") {
+      return res.status(BadRequest).send({ message: 'Переданы некорректные данные' });
+    }
+    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+  }
+}
 module.exports.likeCard = async (req, res) => {
   try {
     const likesCard = await Card.findByIdAndUpdate(
