@@ -41,7 +41,9 @@ module.exports.deleteCard = async (req, res) => {
             res.status(StatusOK).send(card, { message: "Карточка удалена" });
           })
           .catch((err) => {
-            res.status(BadRequest).send({ message: "Передан не валидный id", ...err })
+            if (err.name === 'CastError') {
+              res.status(BadRequest).send({ message: "Передан не валидный id", ...err })
+            }
           })
       } else {
         throw new ForbiddenError("Нет прав на удаление карточки");
@@ -49,7 +51,7 @@ module.exports.deleteCard = async (req, res) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BadRequest).send({ message: "Передан не валидный id" });
+        return res.status(BadRequest).send({ message: "Передан не валидный id111" });
       }
       return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
     });
