@@ -1,7 +1,7 @@
 const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, Conflict, InternalServerError } = require("../errors/errors");
 const User = require('../models/User');
 const ERROR_CODE_DUPLICATE_MONGO = 11000;//вынесены магические числа
-const mongoose = require("mongoose");
+//const mongoose = require("mongoose");
 
 module.exports.getUsers = async (req, res) => {
   try {
@@ -23,8 +23,8 @@ module.exports.getUserById = async (req, res) => {
     if (err.message === "NotFound") {
       return res.status(NotFoundError).send({ message: "Пользователь по id не найден" });
     }
-    if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(BadRequest).send({ message: "Передан не валидный id" });
+    if (err.name === "CastError") {
+      return res.status(BadRequest).send({ message: "Переданы некорректные данные" });
     }
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }

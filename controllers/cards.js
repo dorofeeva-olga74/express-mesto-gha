@@ -16,7 +16,7 @@ module.exports.createCard = async (req, res) => {
     return res.status(StatusCreatedOK).send(await newCard.save());
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res.status(BadRequest).send({ message: 'Переданы некорректные данные для создания карточки', ...err });
+      return res.status(BadRequest).send({ message: "Переданы некорректные данные", ...err });
     }
     return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
