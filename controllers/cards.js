@@ -45,8 +45,11 @@ module.exports.deleteCard = async (req, res) => {
               res.status(BadRequest).send({ message: "Передан не валидный id"})
             }
           })
+      }
+      if (!req.user._id === owner) {
+        res.status(ForbiddenError).send({ message: "Нет прав на удаление карточки"});
       } else {
-        throw new ForbiddenError("Нет прав на удаление карточки");
+        return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
       }
     })
     .catch((err) => {
