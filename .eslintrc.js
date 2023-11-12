@@ -19,6 +19,7 @@ module.exports = {
   //   ecmaVersion: 'latest',
   //   sourceType: 'module',
   // },
+  extends: 'airbnb-base',
   rules: {
     quotes: [
       'error',

@@ -10,6 +10,7 @@ const app = express();
 // Слушаем 3000 порт
 const { PORT = 3000, MONGO_URL = 'mongodb://127.0.0.1:27017/mestodb' } =
  process.env;
+ const { NotFoundError } = require("../errors/errors");
 // const { PORT = 3000, MONGO_URL = "mongodb://127.0.0.1:27017/parrots" } =
 //   process.env;
 mongoose.connect(MONGO_URL, {
@@ -37,7 +38,7 @@ app.use((req, res, next) => {
 
  app.use(function (req, res, next) {
   res
-    .status(404)
+    .status(NotFoundError)
     .send({
       message: "Переданы некорректные данные или такого маршрута несуществует",
     });
