@@ -2,7 +2,28 @@
 const router = require('express').Router();
 const userRouter = require('./users');
 const cardRouter = require('./cards');
+const signinRouter = require('./signin');
+const signupRouter = require('./signup');
+const auth = require("../middlewares/auth");
+//const UnauthorizedError = require('../errors/NotFound');
+const UnauthorizedError = require('../errors/UnauthorizedError.js');
 
+//const authRouter = require('./auths');
+const pageNotAccess = (req, res, next) => {//401
+  //return res.status(new UnauthorizedError).send({ message: "Нет доступа к странице" });
+  next (new UnauthorizedError("Нет доступа к странице"));
+};
+router.use('/signin', signinRouter); //login
+router.use('/signup', signupRouter); //createUser
+// авторизация
+router.use(auth);/// защищаем доступ к роутам, расположенным ниже
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
+//router.use('/auths', authRouter);
+router.use('*', pageNotAccess);
+//по вебинару
+// routes.get("*", (req, res) => {
+//   res.sendFile(INDEX_FILE);
+// });
+
 module.exports = router;

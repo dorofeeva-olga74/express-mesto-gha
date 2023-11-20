@@ -1,68 +1,170 @@
-const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, Conflict, InternalServerError } = require("../errors/errors");
-const User = require('../models/User');
+//const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, Conflict, InternalServerError } = require("../errors/errors");
+const User = require('../models/User.js');
+const bcrypt = require('bcryptjs'); // импортируем bcrypt
+const jwt = require("jsonwebtoken");
 const ERROR_CODE_DUPLICATE_MONGO = 11000;//вынесены магические числа
+const httpConstants = require("http2").constants;
+const mongoose = require("mongoose");
+//const StatusOK = require('../errors/StatusOK.js');
+//const StatusCreatedOK = require('../errors/StatusCreatedOK.js');
+const BadRequest = require('../errors/BadRequest.js');
+const NotFoundError = require('../errors/NotFoundError.js');
+const Conflict = require('../errors/Conflict.js');
+//const InternalServerError = require('../errors/InternalServerError.js');
+const UnauthorizedError = require('../errors/UnauthorizedError.js');
 
-module.exports.getUsers = async (req, res) => {
+// хешируем пароль
+const SOLT_ROUNDS = 10;
+
+module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     return res.send(users);
-  } catch (err) {
-    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера", err: err.message });
+  } catch(err) {
+      next(err);
+    //     throw err; // проброс (*)
+    // if (err.name === "InternalServerError") {
+    //   //throw new InternalServerError("Ошибка на стороне сервера");// Описываем логику её обработки
+    //   return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера", err: err.message });
+    // } else {
+    //   throw e; // проброс (*)
+    // }
+  //return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера", err: err.message });
   }
 };
-module.exports.getUserById = async (req, res) => {
+module.exports.getUserById = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const user = await User.findById(userId);
     if (!user) {
-      throw new Error("NotFound");
+      //throw new Error("NotFound");
+      throw new NotFoundError("Пользователь по id не найден");
     }
-    return res.status(StatusOK).send(user);
+    return res.status(httpConstants.HTTP_STATUS_OK).send(user);
   } catch (err) {
     if (err.message === "NotFound") {
-      return res.status(NotFoundError).send({ message: "Пользователь по id не найден" });
+      next(new NotFoundError("Пользователь по id не найден"));
+      //return res.status(new NotFoundError).send({ message: "Пользователь по id не найден" });
     }
     if (err.name === "CastError") {
-      return res.status(BadRequest).send({ message: "Передан не валидный id" });
+      next(new BadRequest("Передан не валидный id"));
+      //return res.status(new BadRequest).send({ message: "Передан не валидный id" });
+    } else {
+      next(err);
     }
-    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+    //throw err;
+    //throw new InternalServerError("Ошибка на стороне сервера");
+    //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
-module.exports.createUser = async (req, res) => {
+
+module.exports.createUser = async (req, res, next) => {
   try {
-    const newUser = await new User(req.body);
-    return res.status(StatusCreatedOK).send(await newUser.save());
+    const { name, about, avatar, email, password } = req.body;
+    const hash = await bcrypt.hash(password, SOLT_ROUNDS);
+    //const newUser = await new User(req.body); //так было
+    const newUser = await new User.create({  name, about, avatar, email, password: hash });
+    return res.status(httpConstants.HTTP_STATUS_CREATED).send(await newUser.save());
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return res.status(BadRequest).send({ message: "Переданы некорректные данные" });
+    if (err instanceof mongoose.Error.ValidationError) {
+      next(new BadRequest("Переданы некорректные данные"));
+      //return res.status(new BadRequest).send({ message: "Переданы некорректные данные" });
     }
     if (err.code === ERROR_CODE_DUPLICATE_MONGO) {
-      return res.status(Conflict).send({ message: "Пользователь уже существует" });
+      next(new Conflict("Пользователь уже существует"));
+      //return res.status(new Conflict).send({ message: "Пользователь уже существует" });
+    } else {
+      next(err);
     }
-    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+    //throw new InternalServerError("Ошибка на стороне сервера");
+    //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
+    //throw err; // проброс (*)
   }
 };
-module.exports.updateUser = async (req, res) => {
+//Создайте контроллер и роут для получения информации о пользователе
+module.exports.getCurrentUser = async (req, res, next) => {///Чем отличается от getUserById??????????
+  try {
+    const {id} = req.user._id;//req.params??? одно и  то же
+    const currentUser = await User.findById(id);//(req.user._id)
+    currentUser.orFail(() => {
+      throw new NotFoundError({ message: "Пользователь по id не найден" });
+    })
+    return res.status(httpConstants.HTTP_STATUS_OK).send(currentUser);
+  } catch (err)  {
+    if (err.message === "NotFound") {
+      next(new NotFoundError("Пользователь по id не найден"));
+      //return res.status(new NotFoundError).send({ message: "Пользователь по id не найден" });
+    }
+    if (err.name === "CastError") {
+      next(new BadRequest("Передан не валидный id"));
+      //return res.status(new BadRequest).send({ message: "Передан не валидный id" });
+    } else {
+      next(err);
+    }
+    //throw err; // проброс (*)
+    //throw new InternalServerError("Ошибка на стороне сервера");
+    //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
+  }
+};
+////
+// module.exports.getMeUser = (req, res, next) => {
+//   User.findById(req.user._id)
+//     .then((user) => res.status(httpConstants.HTTP_STATUS_OK).send(user))
+//     .catch(next);
+// };
+///
+module.exports.updateUser = async (req, res, next) => {
   try {
     const { name, about } = req.body;
     const updateUser = await User.findByIdAndUpdate(req.user._id, { name, about }, { new: "true", runValidators: "true" });
-    return res.status(StatusOK).send(await updateUser.save());
+    return res.status(httpConstants.HTTP_STATUS_OK).send(await updateUser.save());
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return res.status(BadRequest).send({ message: "Переданы некорректные данные", ...err });
+    if (err instanceof mongoose.Error.ValidationError) {
+     next(new BadRequest("Переданы некорректные данные"));
+    //return res.status(new BadRequest).send({ message: "Переданы некорректные данные", ...err });
+    } else {
+      next(err);
     }
-    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+    //throw err; // проброс (*)
+    //throw new InternalServerError("Ошибка на стороне сервера");
+    //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
-module.exports.updateAvatar = async (req, res) => {
+module.exports.updateAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
     const updateAvatar = await User.findByIdAndUpdate(req.user._id, { avatar }, { new: "true", runValidators: "true" });
-    return res.status(StatusOK).send(updateAvatar);
+    return res.status(httpConstants.HTTP_STATUS_OK).send(updateAvatar);
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return res.status(BadRequest).send({ message: "Переданы некорректные данные", ...err });
+    if (err instanceof mongoose.Error.ValidationError) {
+      next(new BadRequest("Переданы некорректные данные"));
+      //return res.status(new BadRequest).send({ message: "Переданы некорректные данные", ...err });
+    } else {
+      next(err);
     }
-    return res.status(InternalServerError).send({ message: "Ошибка на стороне сервера" });
+    //throw err; // проброс (*)
+    //throw new InternalServerError("Ошибка на стороне сервера");
+    //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
+  }
+};
+module.exports.login = async (req, res, next) => {
+  try {
+    //const { userId } = req.params;?????
+    // const user = await User.findById(userId);????
+    const { email, password } = req.body;
+    const checkedUser =  await User.findUserByCredentials(email, password);
+    const token = jwt.sign({ _id: checkedUser._id }, "some-secret-key", { exp: '7d' }); //exp (expiration time) — время жизни токена.
+    // аутентификация успешна! пользователь в переменной user
+    return res.status(httpConstants.HTTP_STATUS_OK).send(await checkedUser({ token }));
+  } catch (err) {
+    if (err.message === "NotAutanticate") {
+      next(new UnauthorizedError("Не правильные email или password"));
+      //return res.status(new UnauthorizedError).send({ message: "Не правильные email или password" });
+    } else {
+      next(err);
+    }
+    //throw err; // проброс (*)
+    //throw new InternalServerError("Ошибка на стороне сервера");
+    //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
