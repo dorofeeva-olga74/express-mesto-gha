@@ -11,7 +11,7 @@ const UnauthorizedError = require('../errors/UnauthorizedError.js');
 //const authRouter = require('./auths');
 const pageNotAccess = (req, res, next) => {//401
   //return res.status(new UnauthorizedError).send({ message: "Нет доступа к странице" });
-  next (new UnauthorizedError("Нет доступа к странице"));
+  return next (new UnauthorizedError("Нет доступа к странице"));
 };
 router.use('/signin', signinRouter); //login
 router.use('/signup', signupRouter); //createUser

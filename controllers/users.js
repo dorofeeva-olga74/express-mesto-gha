@@ -14,14 +14,14 @@ const Conflict = require('../errors/Conflict.js');
 const UnauthorizedError = require('../errors/UnauthorizedError.js');
 
 // хешируем пароль
-const SOLT_ROUNDS = 10;
+const SOLT_ROUNDS = 7;
 
 module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     return res.send(users);
   } catch(err) {
-      next(err);
+    return next(err);
     //     throw err; // проброс (*)
     // if (err.name === "InternalServerError") {
     //   //throw new InternalServerError("Ошибка на стороне сервера");// Описываем логику её обработки
@@ -43,14 +43,14 @@ module.exports.getUserById = async (req, res, next) => {
     return res.status(httpConstants.HTTP_STATUS_OK).send(user);
   } catch (err) {
     if (err.message === "NotFound") {
-      next(new NotFoundError("Пользователь по id не найден"));
+      return next(new NotFoundError("Пользователь по id не найден"));
       //return res.status(new NotFoundError).send({ message: "Пользователь по id не найден" });
     }
     if (err.name === "CastError") {
-      next(new BadRequest("Передан не валидный id"));
+      return next(new BadRequest("Передан не валидный id"));
       //return res.status(new BadRequest).send({ message: "Передан не валидный id" });
     } else {
-      next(err);
+      return next(err);//return next(err);
     }
     //throw err;
     //throw new InternalServerError("Ошибка на стороне сервера");
@@ -67,14 +67,14 @@ module.exports.createUser = async (req, res, next) => {
     return res.status(httpConstants.HTTP_STATUS_CREATED).send(await newUser.save());
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      next(new BadRequest("Переданы некорректные данные"));
+      return next(new BadRequest("Переданы некорректные данные"));
       //return res.status(new BadRequest).send({ message: "Переданы некорректные данные" });
     }
     if (err.code === ERROR_CODE_DUPLICATE_MONGO) {
-      next(new Conflict("Пользователь уже существует"));
+      return next(new Conflict("Пользователь уже существует"));
       //return res.status(new Conflict).send({ message: "Пользователь уже существует" });
     } else {
-      next(err);
+      return next(err);
     }
     //throw new InternalServerError("Ошибка на стороне сервера");
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
@@ -84,29 +84,34 @@ module.exports.createUser = async (req, res, next) => {
 //Создайте контроллер и роут для получения информации о пользователе
 module.exports.getCurrentUser = async (req, res, next) => {///Чем отличается от getUserById??????????
   try {
-    const {id} = req.user._id;//req.params??? одно и  то же
-    const currentUser = await User.findById(id);//(req.user._id)
-    currentUser.orFail(() => {
-      throw new NotFoundError({ message: "Пользователь по id не найден" });
-    })
+    const { userId } = req.user._id;//req.params??? одно и  то же
+    const currentUser = await User.findById(userId);//(req.user._id)
+    // currentUser.orFail(() => {
+    //   throw new NotFoundError({ message: "Пользователь по id не найден" });
+    // })
     return res.status(httpConstants.HTTP_STATUS_OK).send(currentUser);
   } catch (err)  {
-    if (err.message === "NotFound") {
-      next(new NotFoundError("Пользователь по id не найден"));
-      //return res.status(new NotFoundError).send({ message: "Пользователь по id не найден" });
-    }
-    if (err.name === "CastError") {
-      next(new BadRequest("Передан не валидный id"));
-      //return res.status(new BadRequest).send({ message: "Передан не валидный id" });
-    } else {
-      next(err);
-    }
+    // if (err.message === "NotFound") {
+    //   next(new NotFoundError("Пользователь по id не найден"));
+    //   //return res.status(new NotFoundError).send({ message: "Пользователь по id не найден" });
+    // }
+    // if (err.name === "CastError") {
+    //   next(new BadRequest("Передан не валидный id"));
+    //   //return res.status(new BadRequest).send({ message: "Передан не валидный id" });
+    // } else {
+      return next(err);
+    // }
     //throw err; // проброс (*)
     //throw new InternalServerError("Ошибка на стороне сервера");
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
 ////
+module.exports.getMeUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => res.status(httpConstants.HTTP_STATUS_OK).send(user))
+    .catch(next);
+};
 // module.exports.getMeUser = (req, res, next) => {
 //   User.findById(req.user._id)
 //     .then((user) => res.status(httpConstants.HTTP_STATUS_OK).send(user))
@@ -120,10 +125,10 @@ module.exports.updateUser = async (req, res, next) => {
     return res.status(httpConstants.HTTP_STATUS_OK).send(await updateUser.save());
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-     next(new BadRequest("Переданы некорректные данные"));
+      return next(new BadRequest("Переданы некорректные данные"));
     //return res.status(new BadRequest).send({ message: "Переданы некорректные данные", ...err });
     } else {
-      next(err);
+      return next(err);
     }
     //throw err; // проброс (*)
     //throw new InternalServerError("Ошибка на стороне сервера");
@@ -137,10 +142,10 @@ module.exports.updateAvatar = async (req, res, next) => {
     return res.status(httpConstants.HTTP_STATUS_OK).send(updateAvatar);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      next(new BadRequest("Переданы некорректные данные"));
+      return next(new BadRequest("Переданы некорректные данные"));
       //return res.status(new BadRequest).send({ message: "Переданы некорректные данные", ...err });
     } else {
-      next(err);
+      return next(err);
     }
     //throw err; // проброс (*)
     //throw new InternalServerError("Ошибка на стороне сервера");
@@ -158,13 +163,22 @@ module.exports.login = async (req, res, next) => {
     return res.status(httpConstants.HTTP_STATUS_OK).send(await checkedUser({ token }));
   } catch (err) {
     if (err.message === "NotAutanticate") {
-      next(new UnauthorizedError("Не правильные email или password"));
+      return next(new UnauthorizedError("Не правильные email или password"));
       //return res.status(new UnauthorizedError).send({ message: "Не правильные email или password" });
     } else {
-      next(err);
+      return next(err);
     }
-    //throw err; // проброс (*)
     //throw new InternalServerError("Ошибка на стороне сервера");
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
+};
+///
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch(next);
 };

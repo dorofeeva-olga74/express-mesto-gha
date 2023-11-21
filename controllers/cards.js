@@ -17,7 +17,7 @@ module.exports.getCards = async (req, res) => {
     // if (err.name === "InternalServerError") {
     // return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера", err: err.message });
     // }
-      next(err);
+    return next(err);
 //  throw err; // проброс (*)
   }
 };
@@ -36,11 +36,11 @@ module.exports.createCard = async (req, res, next) => {
     return res.status(httpConstants.HTTP_STATUS_CREATED).send(await newCard.save());
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      next(new BadRequest("Переданы некорректные данные"));
+      return next(new BadRequest("Переданы некорректные данные"));
       //return res.status(new BadRequest).send({ message: "Переданы некорректные данные", ...err });
       //return new BadRequest("Переданы некорректные данные");
     } else {
-      next(err);
+      return next(err);
     }
     //throw err; // проброс (*)
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
@@ -64,16 +64,16 @@ module.exports.deleteCard = async (req, res, next) => {
           })
           .catch(next);
       } else {
-        next(new ForbiddenError("Нет прав на удаление карточки"));
+        return next(new ForbiddenError("Нет прав на удаление карточки"));
         //res.status(new ForbiddenError).send({ message: "Нет прав на удаление карточки" });
       }
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        next(new BadRequest("Передан не валидный id"));
+        return next(new BadRequest("Передан не валидный id"));
         //res.status(new BadRequest).send({ message: "Передан не валидный id" });
       } else {
-        next(err);
+        return next(err);
       }
       //throw err; // проброс (*)
       //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
@@ -93,10 +93,10 @@ module.exports.likeCard = async (req, res, next) => {
       return res.status(httpConstants.HTTP_STATUS_CREATED).send(await likesCard.save());
   } catch (err) {
     if (err.name === "CastError") {
-      next(new BadRequest("Передан не валидный id"));
+      return next(new BadRequest("Передан не валидный id"));
       //return res.status(new BadRequest).send({ message: "Передан не валидный id" });
     } else {
-      next(err);
+      return next(err);
     }
     //throw err; // проброс (*)
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
@@ -116,14 +116,14 @@ module.exports.dislikeCard = async (req, res, next) => {
     return res.status(httpConstants.HTTP_STATUS_OK).send(await dislike.save());
   } catch (err) {
     if (err.message === "NotFound") {
-      next(new NotFoundError("Карточка не найдена"));
+      return next(new NotFoundError("Карточка не найдена"));
       //return res.status(new NotFoundError).send({ message: "Карточка не найдена" });
     }
     if (err.name === "CastError") {
-      next(new BadRequest("Передан не валидный id"));
+      return next(new BadRequest("Передан не валидный id"));
       //return res.status(new BadRequest).send({ message: "Передан не валидный id" });
     } else {
-      next(err);
+      return next(err);
     }
     //throw err; // проброс (*)
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });

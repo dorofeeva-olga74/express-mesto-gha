@@ -8,7 +8,7 @@ signinRouter.post('/', celebrate({
   // валидируем тело запроса
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().label('Password'),
+    password: Joi.string().required(),
   }),
 }), login);
 //signinRouter.post('/', login);
