@@ -92,7 +92,6 @@ module.exports.createUser = async (req, res, next) => {
 module.exports.getCurrentUser = async (req, res, next) => {///Чем отличается от getUserById??????????
   try {
     const { _id } = req.body;//req.params??? одно и  то же
-    console
     const currentUser = await User.findById(_id)
     .orFail(() => {
       throw new NotFoundError({ message: "Пользователь по id не найден" });
