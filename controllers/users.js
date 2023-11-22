@@ -91,8 +91,10 @@ module.exports.createUser = async (req, res, next) => {
 //Создайте контроллер и роут для получения информации о пользователе
 module.exports.getCurrentUser = async (req, res, next) => {///Чем отличается от getUserById??????????
   try {
-    const { _id } = req.body;//req.params??? одно и  то же
-    const currentUser = await User.findById(_id)
+    // const { _id } = req.body;//req.params??? одно и  то же
+    // console.log(`_id: ${_id}`)
+    // console.log(`req.user._id: ${req.user._id}`)
+    const currentUser = await User.findById(req.user._id)
     .orFail(() => {
       throw new NotFoundError({ message: "Пользователь по id не найден" });
     });//(req.user._id)
