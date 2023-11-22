@@ -60,11 +60,11 @@ module.exports.getUserById = async (req, res, next) => {
 
 module.exports.createUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const {name, about, avatar, email, password, } = req.body;
     const hash = await bcrypt.hash(password, SOLT_ROUNDS);
     console.log(`hash: ${hash}`)
     // const newUser = await new User.create((req.body)); //так было
-    const newUser = await User.create({ email, password: hash });
+    const newUser = await User.create({ name, about, avatar, email, password: hash });
     console.log(`newUser: ${newUser}`)
     return res.status(httpConstants.HTTP_STATUS_CREATED).send({
       name: newUser.name,
@@ -92,6 +92,7 @@ module.exports.createUser = async (req, res, next) => {
 module.exports.getCurrentUser = async (req, res, next) => {///Чем отличается от getUserById??????????
   try {
     const { _id } = req.body;//req.params??? одно и  то же
+    console
     const currentUser = await User.findById(_id)
     .orFail(() => {
       throw new NotFoundError({ message: "Пользователь по id не найден" });
