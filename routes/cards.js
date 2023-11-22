@@ -6,7 +6,7 @@ const patternURL = /https?:\/\/(\w{3}\.)?[1-9a-z\-.]{1,}\w\w(\/[1-90a-z.,_@%&?+=
 
 // Здесь роутинг
 cardRouter.get("/", getCards);
-cardRouter.post("/posts", celebrate({
+cardRouter.post("/", celebrate({
   // валидируем тело запроса
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),

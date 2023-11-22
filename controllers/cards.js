@@ -33,7 +33,8 @@ module.exports.createCard = async (req, res, next) => {
   console.log(`name ${name}`)
   // console.log(req.user._id); // _id станет доступен
   try {
-    const newCard = await new Card({ name, link, owner: req.user._id });
+    const newCard = await Card({ name, link, owner: req.user._id });
+    console.log(`newCard ${newCard}`)
     return res.status(httpConstants.HTTP_STATUS_CREATED).send(await newCard.save());
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
