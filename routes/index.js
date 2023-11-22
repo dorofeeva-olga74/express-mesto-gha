@@ -7,12 +7,12 @@ const signupRouter = require("./signup");
 const auth = require("../middlewares/auth");
 //const auth = require("../middlewares/auth");
 //const UnauthorizedError = require('../errors/NotFound');
-const UnauthorizedError = require("../errors/UnauthorizedError.js");
+const NotFoundError = require("../errors/NotFoundError.js");
 
 //const authRouter = require('./auths');
 const pageNotAccess = (req, res, next) => {//401
   //return res.status(new UnauthorizedError).send({ message: "Нет доступа к странице" });
-  return next (new UnauthorizedError("Нет доступа к странице"));
+  return next (new NotFoundError("Страница не найдена"));
 };
 router.use("/signin", signinRouter); //login
 router.use("/signup", signupRouter); //createUser
