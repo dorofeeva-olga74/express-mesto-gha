@@ -3,18 +3,23 @@ const jwt = require("jsonwebtoken");
 //const InternalServerError = require('../errors/InternalServerError.js');
 const UnauthorizedError = require('../errors/UnauthorizedError.js');
 const { JWT_SECRET, NODE_ENV } = process.env;
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   // Верификация токена
   let payload;
   try {
-    // const token = req.headers.authorization;
-    const token = req.cookies.parrotToken;
+    const token = req.headers.authorization;
+    //console.log(token)
+    //const token = req.cookies.parrotToken;
     if (!token) {
       //throw new Error("NotAutanticate");
       throw new UnauthorizedError("Не правильные email или password");
     }
     const validTocken = token.replace("Bearer ", "");
-    payload = jwt.verify(validTocken, NODE_ENV ? JWT_SECRET : "dev_secret");
+
+    //console.log(`validTocken: ${validTocken}`)
+    // payload = jwt.verify(validTocken, NODE_ENV ? JWT_SECRET : "dev_secret");
+    payload = await jwt.verify(validTocken, "some-secret-key");
+    //console.log(`payload: ${payload}`)
     //const { authorization } = req.headers;
   } catch (err) {//!authorization || !authorization.startsWith('Bearer ')
     if (err.message === "NotAutanticate") {

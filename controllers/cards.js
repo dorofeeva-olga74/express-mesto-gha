@@ -1,17 +1,17 @@
 //const { StatusOK, StatusCreatedOK, BadRequest, ForbiddenError, NotFoundError, InternalServerError } = require("../errors/errors");
 
 const httpConstants = require("http2").constants;
-const BadRequest = require('../errors/BadRequest.js');
-const ForbiddenError = require('../errors/ForbiddenError.js');
-const NotFoundError = require('../errors/NotFoundError.js');
+const BadRequest = require("../errors/BadRequest.js");
+const ForbiddenError = require("../errors/ForbiddenError.js");
+const NotFoundError = require("../errors/NotFoundError.js");
 //const Conflict = require('../errors/Conflict.js');
 //const InternalServerError = require('../errors/InternalServerError.js');
 //const UnauthorizedError = require('../errors/UnauthorizedError.js');
-const Card = require('../models/Card');
+const Card = require("../models/Card");
 
 module.exports.getCards = async (req, res) => {
   try {
-    const cards = await Card.find({}).populate(['owner', 'likes']);
+    const cards = await Card.find({}).populate(["owner", "likes"]);
     return res.send(cards);
   } catch (err) {
     // if (err.name === "InternalServerError") {
@@ -29,9 +29,10 @@ module.exports.getCards = async (req, res) => {
 // });
 ///
 module.exports.createCard = async (req, res, next) => {
+  const { name, link } = req.body;
+  console.log(`name ${name}`)
   // console.log(req.user._id); // _id станет доступен
   try {
-    const { name, link } = req.body;
     const newCard = await new Card({ name, link, owner: req.user._id });
     return res.status(httpConstants.HTTP_STATUS_CREATED).send(await newCard.save());
   } catch (err) {

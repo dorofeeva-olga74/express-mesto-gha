@@ -1,10 +1,10 @@
-const { login } = require('../controllers/users');
-const { Joi, celebrate, errors } = require('celebrate');
+const { login } = require("../controllers/users.js");
+const { Joi, celebrate, errors } = require("celebrate");
 //const patternURL = /https?:\/\/(\w{3}\.)?[1-9a-z\-.]{1,}\w\w(\/[1-90a-z.,_@%&?+=~/-]{1,}\/?)?#?/i;
 // создадим express router
-const signinRouter = require('express').Router();
+const signinRouter = require("express").Router();
 // Здесь роутинг
-signinRouter.post('/', celebrate({
+signinRouter.post("/", celebrate({
   // валидируем тело запроса
   body: Joi.object().keys({
     email: Joi.string().required().email(),

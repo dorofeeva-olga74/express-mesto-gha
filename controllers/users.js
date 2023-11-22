@@ -1,20 +1,20 @@
 //const { StatusOK, StatusCreatedOK, BadRequest, NotFoundError, Conflict, InternalServerError } = require("../errors/errors");
-const User = require('../models/User.js');
-const bcrypt = require('bcryptjs'); // импортируем bcrypt
+const User = require("../models/User.js");
+const bcrypt = require("bcrypt"); // импортируем bcrypt
 const jwt = require("jsonwebtoken");
 const ERROR_CODE_DUPLICATE_MONGO = 11000;//вынесены магические числа
 const httpConstants = require("http2").constants;
 const mongoose = require("mongoose");
 //const StatusOK = require('../errors/StatusOK.js');
 //const StatusCreatedOK = require('../errors/StatusCreatedOK.js');
-const BadRequest = require('../errors/BadRequest.js');
-const NotFoundError = require('../errors/NotFoundError.js');
-const Conflict = require('../errors/Conflict.js');
+const BadRequest = require("../errors/BadRequest.js");
+const NotFoundError = require("../errors/NotFoundError.js");
+const Conflict = require("../errors/Conflict.js");
 //const InternalServerError = require('../errors/InternalServerError.js');
-const UnauthorizedError = require('../errors/UnauthorizedError.js');
+//const UnauthorizedError = require("../errors/UnauthorizedError.js");
 
 // хешируем пароль
-const SOLT_ROUNDS = 7;
+const SOLT_ROUNDS = 10;
 
 module.exports.getUsers = async (req, res, next) => {
   try {
@@ -60,35 +60,43 @@ module.exports.getUserById = async (req, res, next) => {
 
 module.exports.createUser = async (req, res, next) => {
   try {
-    const { name, about, avatar, email, password } = req.body;
+    const { email, password } = req.body;
     const hash = await bcrypt.hash(password, SOLT_ROUNDS);
-    //const newUser = await new User(req.body); //так было
-    const newUser = await new User.create({  name, about, avatar, email, password: hash });
-    return res.status(httpConstants.HTTP_STATUS_CREATED).send(await newUser.save());
+    console.log(`hash: ${hash}`)
+    // const newUser = await new User.create((req.body)); //так было
+    const newUser = await User.create({ email, password: hash });
+    console.log(`newUser: ${newUser}`)
+    return res.status(httpConstants.HTTP_STATUS_CREATED).send({
+      name: newUser.name,
+      about: newUser.about,
+      avatar: newUser.avatar,
+      _id: newUser._id,
+      email: newUser.email,
+    });
   } catch (err) {
-    if (err instanceof mongoose.Error.ValidationError) {
-      return next(new BadRequest("Переданы некорректные данные"));
-      //return res.status(new BadRequest).send({ message: "Переданы некорректные данные" });
-    }
+    console.log(err)
     if (err.code === ERROR_CODE_DUPLICATE_MONGO) {
       return next(new Conflict("Пользователь уже существует"));
       //return res.status(new Conflict).send({ message: "Пользователь уже существует" });
-    } else {
+    } else if (err instanceof mongoose.Error.ValidationError) {
+      return next(new BadRequest("Переданы некорректные данные"));
+      //return res.status(new BadRequest).send({ message: "Переданы некорректные данные" });
+    }
+    else {
       return next(err);
     }
     //throw new InternalServerError("Ошибка на стороне сервера");
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
-    //throw err; // проброс (*)
-  }
-};
+ }};
 //Создайте контроллер и роут для получения информации о пользователе
 module.exports.getCurrentUser = async (req, res, next) => {///Чем отличается от getUserById??????????
   try {
-    const { userId } = req.user._id;//req.params??? одно и  то же
-    const currentUser = await User.findById(userId);//(req.user._id)
-    // currentUser.orFail(() => {
-    //   throw new NotFoundError({ message: "Пользователь по id не найден" });
-    // })
+    const { _id } = req.body;//req.params??? одно и  то же
+    const currentUser = await User.findById(_id)
+    .orFail(() => {
+      throw new NotFoundError({ message: "Пользователь по id не найден" });
+    });//(req.user._id)
+    //console.log(`currentUser: ${currentUser}`);
     return res.status(httpConstants.HTTP_STATUS_OK).send(currentUser);
   } catch (err)  {
     // if (err.message === "NotFound") {
@@ -101,7 +109,6 @@ module.exports.getCurrentUser = async (req, res, next) => {///Чем отлич�
     // } else {
       return next(err);
     // }
-    //throw err; // проброс (*)
     //throw new InternalServerError("Ошибка на стороне сервера");
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
@@ -112,12 +119,6 @@ module.exports.getMeUser = (req, res, next) => {
     .then((user) => res.status(httpConstants.HTTP_STATUS_OK).send(user))
     .catch(next);
 };
-// module.exports.getMeUser = (req, res, next) => {
-//   User.findById(req.user._id)
-//     .then((user) => res.status(httpConstants.HTTP_STATUS_OK).send(user))
-//     .catch(next);
-// };
-///
 module.exports.updateUser = async (req, res, next) => {
   try {
     const { name, about } = req.body;
@@ -130,7 +131,6 @@ module.exports.updateUser = async (req, res, next) => {
     } else {
       return next(err);
     }
-    //throw err; // проброс (*)
     //throw new InternalServerError("Ошибка на стороне сервера");
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
@@ -138,6 +138,7 @@ module.exports.updateUser = async (req, res, next) => {
 module.exports.updateAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
+    console.log(`avatar ${avatar}`)
     const updateAvatar = await User.findByIdAndUpdate(req.user._id, { avatar }, { new: "true", runValidators: "true" });
     return res.status(httpConstants.HTTP_STATUS_OK).send(updateAvatar);
   } catch (err) {
@@ -147,38 +148,43 @@ module.exports.updateAvatar = async (req, res, next) => {
     } else {
       return next(err);
     }
-    //throw err; // проброс (*)
     //throw new InternalServerError("Ошибка на стороне сервера");
     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
   }
 };
-module.exports.login = async (req, res, next) => {
-  try {
-    //const { userId } = req.params;?????
-    // const user = await User.findById(userId);????
-    const { email, password } = req.body;
-    const checkedUser =  await User.findUserByCredentials(email, password);
-    const token = jwt.sign({ _id: checkedUser._id }, "some-secret-key", { exp: '7d' }); //exp (expiration time) — время жизни токена.
-    // аутентификация успешна! пользователь в переменной user
-    return res.status(httpConstants.HTTP_STATUS_OK).send(await checkedUser({ token }));
-  } catch (err) {
-    if (err.message === "NotAutanticate") {
-      return next(new UnauthorizedError("Не правильные email или password"));
-      //return res.status(new UnauthorizedError).send({ message: "Не правильные email или password" });
-    } else {
-      return next(err);
-    }
-    //throw new InternalServerError("Ошибка на стороне сервера");
-    //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
-  }
-};
+// module.exports.login = async (req, res, next) => {
+//   try {
+//     const { email, password } = req.body;
+//     const checkedUser =  await User.findUserByCredentials(email, password);
+//     const token = jwt.sign({ _id: checkedUser._id }, "some-secret-key", { exp: "7d" }); //exp (expiration time) — время жизни токена.
+//     // аутентификация успешна! пользователь в переменной user
+//     return res.status(httpConstants.HTTP_STATUS_OK).send(await checkedUser({ token }));
+//   } catch (err) {
+//     if (err.message === "NotAutanticate") {
+//       return next(new UnauthorizedError("Не правильные email или password"));
+//       //return res.status(new UnauthorizedError).send({ message: "Не правильные email или password" });
+//     } else {
+//       return next(err);
+//     }
+//     //throw new InternalServerError("Ошибка на стороне сервера");
+//     //return res.status(new InternalServerError).send({ message: "Ошибка на стороне сервера" });
+//   }
+// };
 ///
-module.exports.login = (req, res, next) => {
+module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-      res.send({ token });
-    })
-    .catch(next);
+
+  console.log(`email: ${email}`)
+  console.log(`password: ${password}`)
+  try {
+    const user = await User.findUserByCredentials(email, password)
+    console.log(`user: ${user}`)
+    const token = await jwt.sign({ _id: user._id }, "some-secret-key", { expiresIn: "7d" }); //exp (expiration time) — время жизни токена.
+    console.log(`token: ${token}`)
+    return res.status(httpConstants.HTTP_STATUS_OK).send(({ token }));
+    //res.send({ email: user.email });
+  } catch (err) {
+    console.log(`err: ${err}`)
+       next(err);
+    }
 };
