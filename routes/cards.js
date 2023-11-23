@@ -10,29 +10,29 @@ cardRouter.get("/", getCards);
 cardRouter.post("/", celebrate({
   // валидируем тело запроса
   body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().pattern(patternURL),
+  name: Joi.string().required().min(2).max(30),
+  link: Joi.string().required().pattern(patternURL),
   }),
 }), createCard);
 
 cardRouter.delete("/:cardId", celebrate({
   // валидируем параметры
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
+  cardId: Joi.string().hex().length(24).required(),
   }),
 }), deleteCard);
 
 cardRouter.put("/:cardId/likes", celebrate({
   // валидируем параметры
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),//alphanum().
+  cardId: Joi.string().hex().length(24).required(),//alphanum().
   }),
 }), likeCard);
 
 cardRouter.delete("/:cardId/likes", celebrate({
   // валидируем параметры
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
+  cardId: Joi.string().hex().length(24).required(),
   }),
 }), dislikeCard);
 

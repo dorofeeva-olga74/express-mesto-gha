@@ -1,5 +1,6 @@
 //КАРТОЧКИ
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const cardSchema = new mongoose.Schema({
   name: { // у карточки есть имя — опишем требования к имени в схеме:
@@ -10,7 +11,11 @@ const cardSchema = new mongoose.Schema({
   },
   link: {//ссылка на картинку
     type: String, // гендер — это строка
-    required: true// оно должно быть у каждого пользователя, так что имя — обязательное пол
+    required: true,// оно должно быть у каждого пользователя, так что имя — обязательное пол
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: 'Некорректная ссылка',
+    },
   },
   owner: {//ссылка на модель автора карточки
     type: [
