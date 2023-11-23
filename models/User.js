@@ -46,15 +46,9 @@ const userSchema = new mongoose.Schema({
   },
 }, { versionKey: false });
 
-// User.findOne({ email }).select('+password')
-//   .then((user) => {
-//     // здесь в объекте user будет хеш пароля
-//   });
-
 // добавим метод findUserByCredentials схеме пользователя//Функция findUserByCredentials
 //не должна быть стрелочной. Это сделано, чтобы мы могли пользоваться this
 // у него будет два параметра — почта и пароль
-
 userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
   return this.findOne({ email }).select("+password")
     .then((user) => {
