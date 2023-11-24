@@ -7,14 +7,14 @@ module.exports = async (req, res, next) => {
   let payload;
   try {
     const token = req.headers.authorization;
-    //console.log(token)
+    console.log(token)
     if (!token) {
       throw new UnauthorizedError("Не правильные email или password");
     }
     const validTocken = token.replace("Bearer ", "");
     //console.log(`validTocken: ${validTocken}`)
-    //console.log(`generateToken: ${generateToken}`)
-    payload = await jwt.verify(validTocken, JWT_SECRET);
+    payload = await jwt.verify(validTocken, "some-secret-key");
+    //payload = await jwt.verify(validTocken, JWT_SECRET);
     //console.log(`payload: ${payload}`)
   } catch (err) {
     if (err.message === "NotAutanticate") {
