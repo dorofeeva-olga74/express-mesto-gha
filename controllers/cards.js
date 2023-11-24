@@ -30,26 +30,6 @@ module.exports.createCard = async (req, res, next) => {
     }
   }
 }
-// module.exports.deleteCard = async (req, res) => {
-//   const objectID = req.params.cardId;
-//   //const owner = card.owner.toString();
-//   //if (req.user._id === owner) {
-//     await Card.findByIdAndRemove(objectID)
-//     .then((card) => {
-//       if (!card) {
-//         return next(new NotFoundError("Карточка не найдена"));
-//         //throw new NotFoundError("Карточка не найдена");
-//       }
-//     return res.status(httpConstants.HTTP_STATUS_OK).send(card);
-//     })
-//     .catch((err) => {
-//       if (err.name === "CastError") {
-//         return next(new BadRequest("Передан не валидный id"));
-//       } else {
-//         return next(err);
-//       }
-//     })
-//   }
 
 module.exports.deleteCard = async (req, res, next) => {
   const objectID = req.params.cardId;
