@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
     }
     const validTocken = token.replace("Bearer ", "");
     //console.log(`validTocken: ${validTocken}`)
-    payload = await jwt.verify(validTocken, "some-secret-key");
+    payload = await jwt.verify(validTocken, JWT_SECRET);
     //payload = await jwt.verify(validTocken, JWT_SECRET);
     //console.log(`payload: ${payload}`)
   } catch (err) {
