@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET, NODE_ENV } = process.env;
 const UnauthorizedError = require('../errors/UnauthorizedError.js');
 
 module.exports = async (req, res, next) => {
@@ -12,7 +13,8 @@ module.exports = async (req, res, next) => {
     }
     const validTocken = token.replace("Bearer ", "");
     //console.log(`validTocken: ${validTocken}`)
-    payload = await jwt.verify(validTocken, "some-secret-key");
+    //console.log(`generateToken: ${generateToken}`)
+    payload = await jwt.verify(validTocken, JWT_SECRET);
     //console.log(`payload: ${payload}`)
   } catch (err) {
     if (err.message === "NotAutanticate") {

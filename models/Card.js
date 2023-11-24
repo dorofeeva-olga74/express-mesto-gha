@@ -14,7 +14,7 @@ const cardSchema = new mongoose.Schema({
     required: true,// оно должно быть у каждого пользователя, так что имя — обязательное пол
     validate: {
       validator: (v) => validator.isURL(v),
-      message: 'Некорректная ссылка',
+      message: 'Ввудите корректную ссылку',
     },
   },
   owner: {//ссылка на модель автора карточки

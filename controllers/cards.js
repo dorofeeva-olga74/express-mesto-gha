@@ -30,24 +30,17 @@ module.exports.createCard = async (req, res, next) => {
     }
   }
 }
-
-module.exports.deleteCard = async (req, res, next) => {
+module.exports.deleteCard = async (req, res) => {
   const objectID = req.params.cardId;
-  await Card.findById(objectID)
-    .orFail(() => {
-      throw new NotFoundError("Карточка не найдена");
-    })
+  //const owner = card.owner.toString();
+  //if (req.user._id === owner) {
+    await Card.findByIdAndRemove(objectID)
     .then((card) => {
-      const owner = card.owner.toString();
-      if (req.user._id === owner) {
-        Card.deleteOne(card)
-          .then(() => {
-            return res.status(httpConstants.HTTP_STATUS_OK).send(card);
-          })
-          .catch(next);
-      } else {
-        return next(new ForbiddenError("Нет прав на удаление карточки"));
+      if (!card) {
+        return next(new NotFoundError("Карточка не найдена"));
+        //throw new NotFoundError("Карточка не найдена");
       }
+    return res.status(httpConstants.HTTP_STATUS_OK).send(card);
     })
     .catch((err) => {
       if (err.name === "CastError") {
@@ -55,8 +48,35 @@ module.exports.deleteCard = async (req, res, next) => {
       } else {
         return next(err);
       }
-    });
-};
+    })
+  }
+
+// module.exports.deleteCard = async (req, res, next) => {
+//   const objectID = req.params.cardId;
+//   await Card.findById(objectID)
+//     .orFail(() => {
+//       throw new NotFoundError("Карточка не найдена");
+//     })
+//     .then((card) => {
+//       const owner = card.owner.toString();
+//       if (req.user._id === owner) {
+//         Card.deleteOne(card)
+//           .then(() => {
+//             return res.status(httpConstants.HTTP_STATUS_OK).send(card);
+//           })
+//           .catch(next);
+//       } else {
+//         return next(new ForbiddenError("Нет прав на удаление карточки"));
+//       }
+//     })
+//     .catch((err) => {
+//       if (err.name === "CastError") {
+//         return next(new BadRequest("Передан не валидный id"));
+//       } else {
+//         return next(err);
+//       }
+//     });
+// };
 module.exports.likeCard = async (req, res, next) => {
   try {
     const likesCard = await Card.findByIdAndUpdate(

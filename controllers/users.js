@@ -1,6 +1,7 @@
 const User = require("../models/User.js");
 const bcrypt = require("bcrypt"); // импортируем bcrypt
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET, NODE_ENV } = process.env;
 const httpConstants = require("http2").constants;
 const mongoose = require("mongoose");
 
@@ -87,6 +88,7 @@ module.exports.getMeUser = (req, res, next) => {
     .then((user) => res.status(httpConstants.HTTP_STATUS_OK).send(user))
     .catch(next);
 };
+
 module.exports.updateUser = async (req, res, next) => {
   try {
     const { name, about } = req.body;
@@ -100,6 +102,7 @@ module.exports.updateUser = async (req, res, next) => {
     }
   }
 };
+
 module.exports.updateAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
@@ -121,7 +124,7 @@ module.exports.login = async (req, res, next) => {
   try {
     const user = await User.findUserByCredentials(email, password)
     //console.log(`user: ${user}`)
-    const token = await jwt.sign({ _id: user._id }, "some-secret-key", { expiresIn: "7d" }); //exp (expiration time) — время жизни токена.
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" }); //exp (expiration time) — время жизни токена.
     //console.log(`token: ${token}`)
     // аутентификация успешна! пользователь в переменной user
     return res.status(httpConstants.HTTP_STATUS_OK).send(({ token }));
