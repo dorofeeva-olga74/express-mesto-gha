@@ -4,6 +4,9 @@ const express = require("express");//
 const dotenv = require("dotenv");
 dotenv.config();
 console.log(process.env.NODE_ENV); // production
+
+const { requestLogger, errorLogger } = require("./middlewares/logger.js");
+
 const mongoose = require("mongoose");
 
 //'helmet' Заголовки безопасности можно проставлять автоматически// npm i
@@ -52,14 +55,23 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 app.use(express.json());
+
+app.use(logger);//???? нужен ли?
+//Логгер запросов нужно подключить до всех обработчиков роутов:
+app.use(requestLogger); // подключаем логгер запросов
+
 app.use("/", router); // запускаем роутер
+
+app.use(errorLogger); // подключаем логгер ошибок
+
 app.use(function (req, res, next) {
   return next(new NotFoundError("Переданы некорректные данные или такого маршрута несуществует"));
 });
-app.use(errors());
+
+app.use(errors());// обработчик ошибок celebrate
 
 // здесь обрабатываем все ошибки
-app.use((err, req, res, next) => {
+app.use((err, req, res, next) => { // централизованный обработчик ошибок
   // если у ошибки нет статуса, выставляем 500 - ERROR_INTERNAL_SERVER
   const { statusCode = ERROR_INTERNAL_SERVER, message } = err;//500
   res.status(statusCode).send({
